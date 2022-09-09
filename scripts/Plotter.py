@@ -59,7 +59,7 @@ def dijkstra(nodes, start_node):
     while not len(queue) == 0:
         current_node = queue.pop(queue.index(min(set(queue).intersection(node_distance), key=node_distance.get)))
         # print(f"{current_node.label}:   {node_distance[current_node]}")
-        for neighbor_node in current_node.neighbors:
+        for neighbor_node in queue:
             new_distance = node_distance[current_node] + distance(current_node, neighbor_node, xz=True)
             if new_distance < node_distance[neighbor_node]:
                 node_distance[neighbor_node] = new_distance
@@ -78,7 +78,7 @@ def wrap_coordinates(coordinates):
     return nodes
 
 
-file = "data/hostageLocations.txt"
+file = "../data/hostageLocations.txt"
 size = [-1000, 1000]
 connect_dots = True
 
@@ -97,6 +97,6 @@ def assign_neighbors(nodes):
 
 assign_neighbors(nodes)
 
-dist, prev = dijkstra(nodes, nodes[1])
+dist, prev = dijkstra(nodes, nodes[0])
 print([d for d in dist.values()])
 print([p.label for p in prev.values() if p is not None])

@@ -1,6 +1,6 @@
 from data_plotter import DataPlotter
 
-file = "data/hostageLocations.txt"
+file = "../data/hostageLocations.txt"
 size = [-1000, 1000]
 connect_dots = True
 
