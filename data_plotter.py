@@ -1,39 +1,20 @@
+import math
 import os
 import re
 import matplotlib.pyplot as plt
 
 
-def read_txt(file):
-    # Open the data file
-    if not os.path.exists(file):
-        raise Exception("The file could not be found")
-
-    # Read and split data
-    txt = open(file, "r")
-    data_str_list = [line.rstrip() for line in txt.readlines()]
-    data_str_list = data_str_list[1:]
-
-    # Return a list of coordinate data
-    return data_str_list
 
 
-# Return a tuple of a list of coordinate tuples and numerical time
-# Uses Python RegEx re module
-def parse_data(data_str_list):
-    pattern = re.compile(
-        r"\((?P<coord_x>-?\d+(\.\d+)?),(?P<coord_y>-?\d+(\.\d+)?),(?P<coord_z>-?\d+(\.\d+)?)\),(?P<time>\d+)")
-    coordinates = []
-    time = []
-    for element in data_str_list:
-        match = pattern.match(element)
-        coordinates.append(
-            (float(match.group("coord_x")), float(match.group("coord_y")), float(match.group("coord_z"))))
-        time.append(match.group("time"))
-    return coordinates, time
 
 
-class DataPlotter():
-    def __init__(self, file_path, plot_size=[1000, 1000], connect_dots=False):
+
+
+# DataPlotter Class
+class DataPlotter:
+    def __init__(self, file_path, plot_size=None, connect_dots=False):
+        if plot_size is None:
+            plot_size = [1000, 1000]
         self.file_path = file_path
         self.plot_size = plot_size
         self.connect_dots = connect_dots
@@ -41,8 +22,35 @@ class DataPlotter():
             self.read_file(self.file_path)
 
     def read_file(self, file_path):
-        data = read_txt(file_path)
-        self.coordinates, self.time = parse_data(data)
+        data = self.__read_txt(file_path)
+        self.coordinates, self.time = self.__parse_data(data)
+
+    # Return a tuple of a list of coordinate tuples and numerical time
+    # Uses Python RegEx re module
+    def __parse_data(self, data_str_list):
+        pattern = re.compile(
+            r"\((?P<coord_x>-?\d+(\.\d+)?),(?P<coord_y>-?\d+(\.\d+)?),(?P<coord_z>-?\d+(\.\d+)?)\),(?P<time>\d+)")
+        coordinates = []
+        time = []
+        for element in data_str_list:
+            match = pattern.match(element)
+            coordinates.append(
+                (float(match.group("coord_x")), float(match.group("coord_y")), float(match.group("coord_z"))))
+            time.append(match.group("time"))
+        return coordinates, time
+
+    def __read_txt(self, file):
+        # Open the data file
+        if not os.path.exists(file):
+            raise Exception("The file could not be found")
+
+        # Read and split data
+        txt = open(file, "r")
+        data_str_list = [line.rstrip() for line in txt.readlines()]
+        data_str_list = data_str_list[1:]
+
+        # Return a list of coordinate data
+        return data_str_list
 
     def plot2D(self):
         xList = [coordinate[0] for coordinate in self.coordinates]
@@ -59,13 +67,15 @@ class DataPlotter():
         plt.ylabel('y')
         plt.title('Hostage Locations')
 
-
         # Plot the points
         plt.plot(0, 0, color='blue', marker='.', markersize=10.0)  # Origin (Player)
         if self.connect_dots:
             plt.plot(xList, yList, color='red', marker='.', markersize=10.0)
         else:
             plt.plot(xList, yList, linestyle='None', color='red', marker='.', markersize=10.0)
+        for index in range(len(self.coordinates)):
+            plt.annotate(index, (xList[index], yList[index]))
+
         plt.grid(True)
         plt.show()
 
