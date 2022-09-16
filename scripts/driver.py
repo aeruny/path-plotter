@@ -7,7 +7,10 @@ connect_dots = True
 # Instantiate the plotter
 plotter = DataPlotter(file, size, connect_dots)
 
-print(plotter.coordinates)
+plotter.plot()
+
+# print(plotter.coordinates)
+
 
 # Plot Data
 #  Note that Unity's default coordinate system is where:
@@ -15,5 +18,5 @@ print(plotter.coordinates)
 #  y-axis represents the vertical distance (height)
 #  z-axis represents the depth
 #  so a top-down perspective is represented in an xz-plane
-plotter.plot2D()
-plotter.plot3D()
+# plotter.plot2D()
+# plotter.plot3D()
