@@ -224,10 +224,10 @@ plotter.xz = True
 nodes = plotter.nodes
 
 # Nearest Neighbor Heuristic
-# NNH_path = nearest_neighbor(nodes, nodes[0])
-# print([x.label for x in NNH_path])
-# x, y = path_to_coordinates(NNH_path)
-# plotter.plot_path("Nearest Neighbor Heuristic", x, y)
+NNH_path = nearest_neighbor(nodes, nodes[0])
+print([x.label for x in NNH_path])
+x, y = path_to_coordinates(NNH_path)
+plotter.plot_path("Nearest Neighbor Heuristic", x, y)
 
 # Greedy Heuristic
 GH_path = greedy(nodes, nodes[0])
