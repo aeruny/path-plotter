@@ -1,26 +1,38 @@
+import math
 import os
 import re
+import numpy as np
 import matplotlib.pyplot as plt
 
 
 # Node Class
 class Node:
-    def __init__(self, coordinate, label=""):
+    def __init__(self, coordinate: list, label: str):
         self.coordinate = coordinate
         self.x = coordinate[0]
         self.y = coordinate[1]
         self.z = coordinate[2]
         self.label = label
         self.visited = False
-        self.neighbors = []
+        self.neighbors = {}
         self.prev = None
         self.next = None
+
+    def __str__(self):
+        return self.label
+
+    def distance(self, node):
+        return math.sqrt(pow(self.coordinate[0] - node.coordinate[0], 2) + pow(self.coordinate[2] - node.coordinate[2], 2))
+
+    def add_neighbors(self, neighbor_nodes):
+        for neighbor in neighbor_nodes:
+            if neighbor is not self:
+                self.neighbors[neighbor] = self.distance(neighbor)
 
 
 # DataPlotter Class
 class DataPlotter:
     def __init__(self, file_path, plot_size=None, connect_dots=False):
-
         if plot_size is None:
             plot_size = [1000, 1000]
         self.file_path = file_path
@@ -28,6 +40,7 @@ class DataPlotter:
         self.connect_dots = connect_dots
         if os.path.exists(file_path):
             self.read_file(self.file_path)
+        self.__assign_neighbors()
         self.xz = False
 
     def read_file(self, file_path):
@@ -36,11 +49,18 @@ class DataPlotter:
 
     # Return a tuple of a list of coordinate tuples and numerical time
     # Uses Python RegEx re module
-    def __wrap_to_nodes(self, coordinates) -> list[Node]:
-        nodes = []
-        for coordinate, index in zip(coordinates, range(len(coordinates))):
-            nodes.append(Node(coordinate=coordinate, label=index))
-        return nodes
+    def __read_txt(self, file):
+        # Open the data file
+        if not os.path.exists(file):
+            raise Exception("The file could not be found")
+
+        # Read and split data
+        txt = open(file, "r")
+        data_str_list = [line.rstrip() for line in txt.readlines()]
+        data_str_list = data_str_list[1:]
+
+        # Return a list of coordinate data
+        return data_str_list
 
     def __parse_data(self, data_str_list) -> (list[Node], list[float]):
         pattern = re.compile(
@@ -54,18 +74,15 @@ class DataPlotter:
             time.append(match.group("time"))
         return self.__wrap_to_nodes(coordinates), time
 
-    def __read_txt(self, file):
-        # Open the data file
-        if not os.path.exists(file):
-            raise Exception("The file could not be found")
+    def __wrap_to_nodes(self, coordinates) -> list[Node]:
+        nodes = []
+        for coordinate, index in zip(coordinates, range(len(coordinates))):
+            nodes.append(Node(coordinate=coordinate, label=index))
+        return nodes
 
-        # Read and split data
-        txt = open(file, "r")
-        data_str_list = [line.rstrip() for line in txt.readlines()]
-        data_str_list = data_str_list[1:]
-
-        # Return a list of coordinate data
-        return data_str_list
+    def __assign_neighbors(self):
+        for node in self.nodes:
+            node.add_neighbors(self.nodes)
 
     def __plot_design_ax(self) -> plt.axes:
         ax = plt.axes
@@ -92,7 +109,6 @@ class DataPlotter:
         for index, node in enumerate(self.nodes):
             plt.annotate(node.label, (xList[index], yList[index]))
         ax.plot(xList, yList, linestyle='None', color='red', marker='.', markersize=10.0)
-
 
     def plot(self):
         self.__plot_design_ax()
@@ -139,17 +155,19 @@ class DataPlotter:
         plt.plot([0, 0], size, linestyle='-', linewidth=1, color='black')
         plt.xlabel('x')
         plt.ylabel('y')
-        plt.title('Hostage Locations')
+
 
         # Plot the points
         plt.plot(0, 0, color='blue', marker='.', markersize=10.0)  # Origin (Player)
         if self.connect_dots:
-            plt.plot(xList, yList, color='red', marker='.', markersize=10.0)
+            plt.title('By the Recorded Order')
+            plt.plot(xList, zList, color='red', marker='.', markersize=10.0)
         else:
-            plt.plot(xList, yList, linestyle='None', color='red', marker='.', markersize=10.0)
+            plt.title('Hostage Locations')
+            plt.plot(xList, zList, linestyle='None', color='red', marker='.', markersize=10.0)
 
         for index, node in enumerate(self.nodes):
-            plt.annotate(node.label, (xList[index], yList[index]))
+            plt.annotate(node.label, (xList[index], zList[index]))
 
         plt.grid(True)
         plt.show()

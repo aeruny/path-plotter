@@ -1,4 +1,7 @@
 import math
+import random
+
+import numpy as np
 
 from data_plotter import DataPlotter, Node
 
@@ -38,7 +41,7 @@ def dijkstra(nodes, start_node):
     node_distance = {}
     previous_node = {}
     for node in nodes:
-        node_distance[node] = math.inf
+        node_distance[node] = float('inf')
         previous_node[node] = None
         queue.append(node)
     node_distance[start_node] = 0
@@ -50,35 +53,6 @@ def dijkstra(nodes, start_node):
         # print(f"{current_node.label}:   {node_distance[current_node]}")
         for neighbor_node in queue:
             new_distance = node_distance[current_node] + distance(current_node, neighbor_node, xz=True)
-            if new_distance < node_distance[neighbor_node]:
-                node_distance[neighbor_node] = new_distance
-                previous_node[neighbor_node] = current_node
-
-    return node_distance, previous_node
-
-
-# dijkstra: Dijkstra's Algorithm
-# public function
-# params: nodes[list[Node]], start_node[Node]
-# return: Dict[Node: Float], Dict[Node: Node]
-def modify_dijkstra(nodes, start_node):
-    queue = []
-    node_distance = {}
-    previous_node = {}
-    for node in nodes:
-        node_distance[node] = math.inf
-        previous_node[node] = None
-        queue.append(node)
-    node_distance[start_node] = 0
-
-    # print([node for node in node_distance.values()])
-
-    while not len(queue) == 0:
-        current_node = queue.pop(queue.index(min(set(queue).intersection(node_distance), key=node_distance.get)))
-        mask = current_node.visited
-        # print(f"{current_node.label}:   {node_distance[current_node]}")
-        for neighbor_node in queue:
-            new_distance = node_distance[current_node]
             if new_distance < node_distance[neighbor_node]:
                 node_distance[neighbor_node] = new_distance
                 previous_node[neighbor_node] = current_node
@@ -114,61 +88,109 @@ def nearest_neighbor(nodes: list[Node], start_node: Node) -> list[Node]:
     return path
 
 
-def is_cyclic(node1: Node, node2: Node):
+
+
+def is_cyclic(connection, node1: Node, node2: Node, nodes_len: int):
     check_node = node1
     visited = []
-    while len(check_node.neighbors) > 0:
+    index = 0
+    while len(connection[check_node]) > 0:
+        index += 1
         visited.append(check_node)
-        if node2 in check_node.neighbors:
+        if node2 in connection[check_node]:
+            if index == nodes_len - 1:
+                return False
             return True
 
-        if check_node.neighbors[0] in visited:
-            if len(check_node.neighbors) == 1:
+        if connection[check_node][0] in visited:
+            if len(connection[check_node]) == 1:
                 return False
-            check_node = check_node.neighbors[1]
+            check_node = connection[check_node][1]
         else:
-            check_node = check_node.neighbors[0]
+            check_node = connection[check_node][0]
+
     return False
 
-
 def greedy(nodes: list[Node], start_node: Node):
-    clean_nodes(nodes)
-    index = 0
-    for _ in nodes[:-1]:
-        pairs = []
+    connection = {}
+    for node in nodes:
+        connection[node] = []
+    for _ in nodes:
+        costs = {}
         for a in nodes:
             for b in nodes:
-                if a is not b and len(a.neighbors) < 2 and len(b.neighbors) < 2:
-                    if not is_cyclic(a, b):
-                        pairs.append((a, b))
-        min_val = float(math.inf)
-        min_pair = ()
-        for x in pairs:
-            temp_dist = distance(x[0], x[1])
-            if temp_dist < min_val:
-                min_val = temp_dist
-                min_pair = x
-        min_pair[0].neighbors.append(min_pair[1])
-        min_pair[1].neighbors.append(min_pair[0])
-
-        if nodes[1] in min_pair:
-            print(f"{index}: {[x.label for x in min_pair]}")
-        index += 1
+                if a is not b and len(connection[a]) < 2 and len(connection[b]) < 2:
+                    if not is_cyclic(connection, a, b, len(nodes)):
+                        costs[distance(a, b)] = (a, b)
+        min_cost = float('inf')
+        for cost in costs:
+            if cost < min_cost:
+                min_cost = cost
+        a, b = costs[min_cost]
+        connection[a].append(b)
+        connection[b].append(a)
+        print(f"{a.label} - {b.label}")
 
     # Convert to path
     current_node = start_node
     path = []
     for _ in nodes:
-        print(f"{current_node.label}: {[x.label for x in current_node.neighbors]}")
+        # print(f"{current_node.label}: {[x.label for x in connection[current_node]]}")
         path.append(current_node)
-        if current_node.neighbors[0] in path:
-            if len(current_node.neighbors) == 1:
-                path.append(start_node.neighbors[1])
+        if connection[current_node][0] in path:
+            if len(connection[current_node]) == 1:
+                path.append(connection[current_node][1])
                 break
-            current_node = current_node.neighbors[1]
+            current_node = connection[current_node][1]
         else:
-            current_node = current_node.neighbors[0]
+            current_node = connection[current_node][0]
     return path
+
+
+# Random Path
+def random_pathing(graph, start_node):
+    path = [start_node]
+    queue = []
+    for node in graph:
+        queue.append(node)
+    queue.remove(start_node)
+
+    while queue:
+        path.append(queue.pop(random.randrange(0, len(queue))))
+    return path
+
+
+# Prim's Algorithm (Greedy)
+# Finds the minimum spanning tree of a graph
+def prim(graph, start_node):
+    costs = {}
+    queue = []
+    # costs[start_node] = 0
+    costs[start_node] = [0, None]
+    queue.append(start_node)
+    while len(queue) > 0:
+        current_node = min(queue, key=lambda x: costs[x])
+        queue.remove(current_node)
+        for neighbor_node in current_node.neighbors:
+            if neighbor_node not in queue:
+                queue.append(neighbor_node)
+                costs[neighbor_node] = [current_node.neighbors[neighbor_node], current_node]
+            elif current_node.neighbors[neighbor_node] < costs[neighbor_node][0]:
+                costs[neighbor_node] = [current_node.neighbors[neighbor_node], current_node]
+
+    tree = {}
+    for node in costs:
+        if costs[node][1] == None:
+            continue
+        if node not in tree:
+            tree[node] = [costs[node][1]]
+        else:
+            tree[node].append(costs[node][1])
+        if costs[node][1] not in tree:
+            tree[costs[node][1]] = [node]
+        else:
+            tree[costs[node][1]].append(node)
+    return tree
 
 
 # def travelling_salesman_problem(nodes, start_node):
@@ -212,28 +234,6 @@ def path_to_coordinates(path: list[Node], xz=True):
         y.append(node.z if xz else node.y)
     return x, y
 
-
-file = "../data/hostageLocations.txt"
-size = [-1000, 1000]
-connect_dots = True
-
-# Instantiate the plotter
-plotter = DataPlotter(file, size, connect_dots)
-plotter.xz = True
-
-nodes = plotter.nodes
-
-# Nearest Neighbor Heuristic
-NNH_path = nearest_neighbor(nodes, nodes[0])
-print([x.label for x in NNH_path])
-x, y = path_to_coordinates(NNH_path)
-plotter.plot_path("Nearest Neighbor Heuristic", x, y)
-
-# Greedy Heuristic
-GH_path = greedy(nodes, nodes[0])
-print([x.label for x in GH_path])
-x, y = path_to_coordinates(GH_path)
-plotter.plot_path("Greedy Heuristic", x, y)
 
 # Travelling Salesman Problem
 # cost = travelling_salesman_problem(nodes, nodes[0])
