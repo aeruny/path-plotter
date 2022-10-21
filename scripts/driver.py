@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from data_plotter import DataPlotter
 from scripts.path_finder import nearest_neighbor, path_to_coordinates, greedy, random_pathing
 
-file = "../data/hostageLocations.txt"
+file = "../data/testLocations.txt"
 
 size = [-1000, 1000]
 connect_dots = True
@@ -24,7 +24,6 @@ connect_dots = True
 #  so a top-down perspective is represented in an xz-plane
 
 # plotter.plot3D()
-
 
 # Instantiate the plotter
 plotter = DataPlotter(file, size, connect_dots=False)

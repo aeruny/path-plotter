@@ -199,9 +199,6 @@ class DataPlotter:
     def plot_path_gif(self, plot_name: str, x: list[float], y: list[float], file_name: str):
         xList = [node.coordinate[0] for node in self.nodes]
         yList = [node.coordinate[2] for node in self.nodes] if self.xz else [node.coordinate[1] for node in self.nodes]
-
-        print(f"x list: {xList}  {len(xList)}")
-        print(f"y list: {yList}  {len(yList)}")
         size = self.plot_size
 
         fig, ax = plt.subplots()
@@ -214,11 +211,12 @@ class DataPlotter:
             ax.set_title(plot_name)
             lineX, = ax.plot(size, [0, 0], linestyle='-', linewidth=1, color='black')
             lineY, = ax.plot([0, 0], size, linestyle='-', linewidth=1, color='black')
-            line, = ax.plot(xList[:i+1], yList[:i+1], color='blue', marker='.', markersize=10.0)
+            line, = ax.plot(x[:i+1], y[:i+1], color='blue', marker='.', markersize=10.0)
+            points = ax.scatter(x, y, color='red')
             # for index, node in enumerate(self.nodes[:i+1]):
             #     ax.annotate(node.label, (xList[index], yList[index]))
-            return line, lineX, lineY
+            return line, lineX, lineY, points
 
 
-        animation = FuncAnimation(fig, animate, interval=40, blit=True, repeat=True, frames=len(xList))
-        animation.save(file_name, dpi=300, writer=PillowWriter(fps=3))
+        animation = FuncAnimation(fig, animate, interval=40, blit=True, repeat=True, frames=len(x))
+        animation.save(file_name, dpi=300, writer=PillowWriter(fps=2))
