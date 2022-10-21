@@ -3,6 +3,7 @@ import os
 import re
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation, PillowWriter
 
 
 # Node Class
@@ -22,7 +23,8 @@ class Node:
         return self.label
 
     def distance(self, node):
-        return math.sqrt(pow(self.coordinate[0] - node.coordinate[0], 2) + pow(self.coordinate[2] - node.coordinate[2], 2))
+        return math.sqrt(
+            pow(self.coordinate[0] - node.coordinate[0], 2) + pow(self.coordinate[2] - node.coordinate[2], 2))
 
     def add_neighbors(self, neighbor_nodes):
         for neighbor in neighbor_nodes:
@@ -156,7 +158,6 @@ class DataPlotter:
         plt.xlabel('x')
         plt.ylabel('y')
 
-
         # Plot the points
         plt.plot(0, 0, color='blue', marker='.', markersize=10.0)  # Origin (Player)
         if self.connect_dots:
@@ -194,3 +195,30 @@ class DataPlotter:
             ax.plot3D(xList, yList, zList, linestyle='None', marker='.', markersize=10.0, color='red')
         ax.set_title('3D line plot geeks for geeks')
         plt.show()
+
+    def plot_path_gif(self, plot_name: str, x: list[float], y: list[float], file_name: str):
+        xList = [node.coordinate[0] for node in self.nodes]
+        yList = [node.coordinate[2] for node in self.nodes] if self.xz else [node.coordinate[1] for node in self.nodes]
+
+        print(f"x list: {xList}  {len(xList)}")
+        print(f"y list: {yList}  {len(yList)}")
+        size = self.plot_size
+
+        fig, ax = plt.subplots()
+        def animate(i):
+            ax.clear()
+            ax.set_xlim(size[0], size[1])
+            ax.set_ylim(size[0], size[1])
+            ax.set_xlabel('x')
+            ax.set_ylabel('y')
+            ax.set_title(plot_name)
+            lineX, = ax.plot(size, [0, 0], linestyle='-', linewidth=1, color='black')
+            lineY, = ax.plot([0, 0], size, linestyle='-', linewidth=1, color='black')
+            line, = ax.plot(xList[:i+1], yList[:i+1], color='blue', marker='.', markersize=10.0)
+            # for index, node in enumerate(self.nodes[:i+1]):
+            #     ax.annotate(node.label, (xList[index], yList[index]))
+            return line, lineX, lineY
+
+
+        animation = FuncAnimation(fig, animate, interval=40, blit=True, repeat=True, frames=len(xList))
+        animation.save(file_name, dpi=300, writer=PillowWriter(fps=3))

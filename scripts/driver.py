@@ -32,27 +32,29 @@ plotter.xz = True
 
 nodes = plotter.nodes
 # Clean Scatter Plot
-plotter.plot2D()
+# plotter.plot2D()
 
 
 # Nearest Neighbor Heuristic
 NNH_path = nearest_neighbor(nodes, nodes[0])
 print([x.label for x in NNH_path])
 x, y = path_to_coordinates(NNH_path)
-plotter.plot_path("Nearest Neighbor Heuristic", x, y)
+# plotter.plot_path("Nearest Neighbor Heuristic", x, y)
+plotter.plot_path_gif("Nearest Neighbor Heuristic Path", x, y, "NNH.gif")
 
 # Greedy Heuristic
 GH_path = greedy(nodes, nodes[0])
 print([x.label for x in GH_path])
 x, y = path_to_coordinates(GH_path)
-plotter.plot_path("Greedy Heuristic", x, y)
+# plotter.plot_path("Greedy Heuristic", x, y)
+plotter.plot_path_gif("Greedy Heuristic Path", x, y, "Greedy.gif")
 
 # Random
 random_path = random_pathing(nodes, nodes[0])
 print([x.label for x in random_path])
 x, y = path_to_coordinates(random_path)
-plotter.plot_path("Random Path", x, y)
+# plotter.plot_path("Random Path", x, y)
 
 # Order
 plotter.connect_dots = True
-plotter.plot2D()
+# plotter.plot2D()
