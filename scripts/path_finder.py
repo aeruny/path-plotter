@@ -31,6 +31,12 @@ def __distance2D(coordA, coordB, xz):
 def distance(nodeA, nodeB, xz=True):
     return __distance2D(nodeA.coordinate, nodeB.coordinate, xz)
 
+# distance: Euclidean Distance Calculator
+# public function
+# params: nodeA[Node], nodeB[Node], xz[boolean]
+def distance3D(nodeA, nodeB):
+    return __distance3D(nodeA.coordinate, nodeB.coordinate)
+
 
 # public function
 # dijkstra: Dijkstra's Algorithm

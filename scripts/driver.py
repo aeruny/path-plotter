@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from data_plotter import DataPlotter
 from scripts.path_finder import nearest_neighbor, path_to_coordinates, greedy, random_pathing
 
-file = "../data/testLocations.txt"
+file = "../data/hostageLocations.txt"
 
 size = [-1000, 1000]
 connect_dots = True
@@ -38,15 +38,15 @@ nodes = plotter.nodes
 NNH_path = nearest_neighbor(nodes, nodes[0])
 print([x.label for x in NNH_path])
 x, y = path_to_coordinates(NNH_path)
-# plotter.plot_path("Nearest Neighbor Heuristic", x, y)
-plotter.plot_path_gif("Nearest Neighbor Heuristic Path", x, y, "NNH.gif")
+plotter.plot_path("Nearest Neighbor Heuristic", x, y)
+#plotter.plot_path_gif("Nearest Neighbor Heuristic Path", x, y, "NNH.gif")
 
 # Greedy Heuristic
 GH_path = greedy(nodes, nodes[0])
 print([x.label for x in GH_path])
 x, y = path_to_coordinates(GH_path)
-# plotter.plot_path("Greedy Heuristic", x, y)
-plotter.plot_path_gif("Greedy Heuristic Path", x, y, "Greedy.gif")
+plotter.plot_path("Greedy Heuristic", x, y)
+#plotter.plot_path_gif("Greedy Heuristic Path", x, y, "Greedy.gif")
 
 # Random
 random_path = random_pathing(nodes, nodes[0])
