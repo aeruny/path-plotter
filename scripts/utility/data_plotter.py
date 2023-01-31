@@ -2,9 +2,10 @@ from path_function import *
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
 
+
 # DataPlotter Class
 class DataPlotter:
-    def __init__(self, graph: Graph=None, plot_size=None, label_on=False):
+    def __init__(self, graph: Graph = None, plot_size=None, label_on=False):
         self.graph = graph
         if plot_size is None:
             plot_size = [2000, 2000]
@@ -17,8 +18,7 @@ class DataPlotter:
         plt.grid(True)
         plt.show()
 
-
-    def plot2D(self, plot_name: str, path:list[Node]):
+    def plot2D(self, plot_name: str, path: list[Node]):
         # Plot Design
         # plt.xlim(-self.plot_size[0]//2, self.plot_size[0]//2)
         # plt.ylim(-self.plot_size[1]//2, self.plot_size[1]//2)
@@ -44,12 +44,10 @@ class DataPlotter:
         p_x, p_y, p_z = nodes_to_coordinates(path)
         plt.plot(p_x, p_y, linestyle='-', color='blue', markersize=10.0)
 
-
         plt.grid(True)
         plt.show()
 
-
-    def plot3D(self, plot_name: str, nodes:list[Node]):
+    def plot3D(self, plot_name: str, nodes: list[Node]):
         g_x, g_y, g_z, labels = self.graph.to_coordinates3D()
         n_x, n_y, n_z = nodes_to_coordinates(nodes)
 
@@ -73,10 +71,9 @@ class DataPlotter:
 
         plt.show()
 
-    def plot_path_gif(self, plot_name: str, nodes:list[Node], output_file_name: str):
+    def plot_path_gif(self, plot_name: str, nodes: list[Node], output_file_name: str):
         n_x, n_y, n_z = nodes_to_coordinates(nodes)
         fig, ax = plt.subplots()
-
 
         def animate(i):
             ax.clear()
@@ -100,7 +97,7 @@ class DataPlotter:
         animation.save(output_file_name, dpi=300, writer=PillowWriter(fps=2))
         plt.show()
 
-    def __get_center_limits(self, nodes:list[Node], offset:float=50):
+    def __get_center_limits(self, nodes: list[Node], offset: float = 50):
         x, y, z = nodes_to_coordinates(nodes)
         x_max, x_min, y_max, y_min = max(x), min(x), max(y), min(y)
         # x_max = max(x_max, self.plot_size[0]//2)
@@ -109,12 +106,12 @@ class DataPlotter:
         # y_max = max(y_max, -self.plot_size[1]//2)
         return (x_min - offset, x_max + offset), (y_min - offset, y_max + offset)
 
-    def __get_soft_center_limits(self, nodes:list[Node], offset: float=50):
+    def __get_soft_center_limits(self, nodes: list[Node], offset: float = 50):
         (x_max, x_min), (y_max, y_min) = self.__get_center_limits(nodes, 0)
-        x_max = max(x_max, self.plot_size[0]//2)
-        x_min = min(x_max, -self.plot_size[0]//2)
-        y_max = max(y_max, self.plot_size[1]//2)
-        y_max = max(y_max, -self.plot_size[1]//2)
+        x_max = max(x_max, self.plot_size[0] // 2)
+        x_min = min(x_max, -self.plot_size[0] // 2)
+        y_max = max(y_max, self.plot_size[1] // 2)
+        y_max = max(y_max, -self.plot_size[1] // 2)
 
         return (x_min - offset, x_max + offset), (y_min - offset, y_max + offset)
 
@@ -143,5 +140,3 @@ class DataPlotter:
         for index, node in enumerate(self.nodes):
             plt.annotate(node.label, (xList[index], yList[index]))
         ax.plot(xList, yList, linestyle='None', color='red', marker='.', markersize=10.0)
-
-
