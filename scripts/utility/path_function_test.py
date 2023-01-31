@@ -2,8 +2,8 @@ import os.path
 import unittest
 from path_function import *
 
-class PathFunctionTest(unittest.TestCase):
 
+class PathFunctionTest(unittest.TestCase):
 
     def test_Node(self):
         # Test Coordinate Return
@@ -33,12 +33,11 @@ class PathFunctionTest(unittest.TestCase):
         test_value = test_node.neighbors
         self.assertListEqual(true_value, test_value)
 
-
     def test_Graph(self):
         pass
 
     def test_create_graph(self):
-        true_value = (0,0,0)
+        true_value = (0, 0, 0)
         data_file = "data\hostageLocations.txt"
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), data_file)
         graph = create_graph(path)

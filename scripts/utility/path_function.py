@@ -3,14 +3,17 @@ import os
 import random
 import re
 
+
 # Node Class
 class Node:
-    def __init__(self, coordinate:tuple, label:str="", unity_coordinate:bool=True):
+    def __init__(self, coordinate: tuple = (0, 0, 0), time: float = 0.0, label: str = "",
+                 unity_coordinate: bool = True):
         self.coordinate = coordinate
         self.x = coordinate[0]
         self.y = coordinate[1] if not unity_coordinate else coordinate[2]
         self.z = coordinate[2] if not unity_coordinate else coordinate[1]
         self.label = label
+        self.time = time
         self.neighbors = []
 
     def __str__(self) -> str:
@@ -28,8 +31,10 @@ class Node:
             else:
                 self.neighbors.append(neighbor)
 
+
+# Graph Class
 class Graph:
-    def __init__(self, nodes:list[Node]):
+    def __init__(self, nodes):
         self.nodes = nodes
         self.connections = {}
 
@@ -44,7 +49,6 @@ class Graph:
             node.add_neighbors(nodes)
             self.connections[node] = nodes
             nodes.append(node)
-
 
     # Clear all connections
     def clean_nodes(self):
@@ -68,6 +72,23 @@ class Graph:
             labels.append(node.label)
         return x, y, z, labels
 
+
+def read_path_file(file: str):
+    # Open the data file
+    if not os.path.exists(file):
+        raise Exception("The file was not be found")
+    with open(file, "r") as txt:
+        # Split data
+        data_str_list = [line.rstrip() for line in txt.readlines()]
+
+        # Store the node and time lists
+        coordinates, times = parse_data(data_str_list)
+        labels = ["Time: " + str(time) for time in times]
+        nodes = coordinates_to_nodes(coordinates, times, labels)
+        graph = Graph(nodes)
+        return graph
+
+
 def create_graph(file: str):
     # Open the data file
     if not os.path.exists(file):
@@ -75,21 +96,24 @@ def create_graph(file: str):
     with open(file, "r") as txt:
         # Split data
         data_str_list = [line.rstrip() for line in txt.readlines()]
-        data_str_list = data_str_list[1:]  # Omit the header of the data file
 
         # Store the node and time lists
         coordinates, times = parse_data(data_str_list)
-        nodes = coordinates_to_nodes(coordinates)
+        labels = ["Node " + str(i) for i in range(len(coordinates))]
+        nodes = coordinates_to_nodes(coordinates, times, labels)
         graph = Graph(nodes)
         return graph
 
-def parse_data(data_str_list:list[str]) -> (list[tuple[float]], list[str]):
-    pattern = re.compile(r"\((?P<coord_x>-?\d+(\.\d+)?),(?P<coord_y>-?\d+(\.\d+)?),(?P<coord_z>-?\d+(\.\d+)?)\),(?P<time>\d+)")
+
+def parse_data(data_str_list: list[str]) -> (list[tuple[float]], list[str]):
+    pattern = re.compile(
+        r"\((?P<coord_x>.*),(?P<coord_y>.*),(?P<coord_z>.*)\),(?P<time>.*)")
     coordinates = []
     times = []
     for element in data_str_list:
         match = pattern.match(element)
-        coordinates.append((float(match.group("coord_x")), float(match.group("coord_y")), float(match.group("coord_z"))))
+        coordinates.append(
+            (float(match.group("coord_x")), float(match.group("coord_y")), float(match.group("coord_z"))))
         times.append(match.group("time"))
     return coordinates, times
 
@@ -97,19 +121,18 @@ def parse_data(data_str_list:list[str]) -> (list[tuple[float]], list[str]):
 # distance: Euclidean Distance between two 2D nodes
 # public function
 # params: nodeA[Node], nodeB[Node]
-def distance2D(nodeA:Node, nodeB:Node)->float:
+def distance2D(nodeA: Node, nodeB: Node) -> float:
     return __distance2D(nodeA.coordinate, nodeB.coordinate)
 
 
 # distance: Euclidean Distance between two 3D nodes
 # public function
 # params: nodeA[Node], nodeB[Node]
-def distance3D(nodeA:Node, nodeB:Node)->float:
+def distance3D(nodeA: Node, nodeB: Node) -> float:
     return __distance3D(nodeA.coordinate, nodeB.coordinate)
 
 
-
-
+## Travelling Salesman Problem
 
 
 # public function
@@ -135,8 +158,6 @@ def nearest_neighbor(graph: Graph, start_node: Node) -> list[Node]:
         current_node = min_node
         path.append(current_node)
     return path
-
-
 
 
 def greedy(nodes: list[Node], start_node: Node):
@@ -173,7 +194,6 @@ def greedy(nodes: list[Node], start_node: Node):
         else:
             current_node = connection[current_node][0]
     return path
-
 
 
 # Random Path
@@ -247,21 +267,18 @@ def prim(graph, start_node):
 # wrap_coordinates: 3D Vector to Node Converter
 # param: coordinates[3D Vector]
 # return: Node
-def coordinates_to_nodes(coordinates:list[tuple[float]], labels: list[str]=None) -> list[Node]:
-    if labels is None:
-        labels = ["Node " + str(i) for i in range(len(coordinates))]
-    return [Node(coordinate, label) for coordinate, label in zip(coordinates, labels)]
+def coordinates_to_nodes(coordinates: list[tuple[float]], times: list[float], labels: list[str]) -> list[Node]:
+    return [Node(coordinate, time, label) for coordinate, time, label in zip(coordinates, times, labels)]
 
 
 def nodes_to_coordinates(path: list[Node]):
-    x = []
-    y = []
-    z = []
+    x, y, z = [], [], []
     for node in path:
         x.append(node.x)
         y.append(node.y)
         z.append(node.z)
     return x, y, z
+
 
 def __dijkstra_extract_path(reverse_path: dict[Node], end_node: Node):
     path = []
@@ -270,6 +287,7 @@ def __dijkstra_extract_path(reverse_path: dict[Node], end_node: Node):
         path.append(current_node)
         current_node = reverse_path[current_node]
     return path[::-1]
+
 
 def is_cyclic(connection, node1: Node, node2: Node, nodes_len: int):
     check_node = node1
@@ -292,16 +310,20 @@ def is_cyclic(connection, node1: Node, node2: Node, nodes_len: int):
 
     return False
 
+
 def print_path(path: list[Node]):
     print([node.label for node in path])
 
+
+def print_path_coordinates(path: list[Node]):
+    print([node.coordinate for node in path])
 
 
 # distance3D: Euclidean Distance between two 3D coordinates
 # private utility function
 # params: coordA[3D vector], coordB[3D vector]
 # return: float
-def __distance3D(coordA:tuple[float], coordB:tuple[float]) -> float:
+def __distance3D(coordA: tuple[float], coordB: tuple[float]) -> float:
     return math.sqrt(sum([(a - b) * (a - b) for a, b in zip(coordA, coordB)]))
 
 
@@ -309,5 +331,5 @@ def __distance3D(coordA:tuple[float], coordB:tuple[float]) -> float:
 # private utility function
 # params: coordA[3D vector], coordB[3D vector]
 # return: float
-def __distance2D(coordA:tuple[float], coordB:tuple[float])->float:
-        return math.sqrt(pow(coordA[0] - coordB[0], 2) + pow(coordA[1] - coordB[1], 2))
+def __distance2D(coordA: tuple[float], coordB: tuple[float]) -> float:
+    return math.sqrt(pow(coordA[0] - coordB[0], 2) + pow(coordA[1] - coordB[1], 2))
