@@ -15,7 +15,8 @@ def path_deviation(hostage_positions: list[Node], player_path: list[Node]):
     # 1. Determine the ideal path
     ideal_path = {}
 
-    # 2. Determine the next hostage the player rescues
+    # 2. Determine the player's order of hostage rescue
+    rescue_order = extract_rescue_order(hostage_positions, player_path, 10)
 
     # 3. Find the closest point to the player in the ideal path to the next hostage
 
@@ -24,7 +25,7 @@ def path_deviation(hostage_positions: list[Node], player_path: list[Node]):
     # 5. Record the distance in a txt file
 
 
-def rescue_order(hostage_nodes: list[Node], player_path: list[Node], threshold: float = 1) -> list[Node]:
+def extract_rescue_order(hostage_nodes: list[Node], player_path: list[Node], threshold: float = 1) -> list[Node]:
     rescue_list = []
     for player_node in player_path:
         threshold_list = []
@@ -36,3 +37,6 @@ def rescue_order(hostage_nodes: list[Node], player_path: list[Node], threshold: 
             if rescued_hostage not in rescue_list:
                 rescue_list.append(rescued_hostage)
     return rescue_list
+
+def calculate_closest_point(nodeA: Node, nodeB: Node, target: Node):
+    pass
