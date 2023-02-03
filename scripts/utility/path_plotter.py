@@ -4,7 +4,7 @@ from matplotlib.animation import FuncAnimation, PillowWriter
 
 
 # DataPlotter Class
-class DataPlotter:
+class PathPlotter:
     def __init__(self, graph: Graph = None, plot_size=None, label_on=False):
         self.graph = graph
         if plot_size is None:

@@ -1,5 +1,5 @@
 from path_function import *
-from utility.data_plotter import DataPlotter
+from utility.path_plotter import PathPlotter
 
 data_file = "data\hostageLocations.txt"
 path = os.path.join(os.path.dirname(os.path.dirname(__file__)), data_file)
@@ -9,7 +9,7 @@ graph.apply_complete_connection()
 # print_path(graph.nodes)
 
 
-plotter = DataPlotter(graph)
+plotter = PathPlotter(graph)
 
 # Nearest Neighbor Heuristic
 NNH_path = nearest_neighbor(graph, graph.nodes[0])
