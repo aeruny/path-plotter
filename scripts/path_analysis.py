@@ -38,5 +38,19 @@ def extract_rescue_order(hostage_nodes: list[Node], player_path: list[Node], thr
                 rescue_list.append(rescued_hostage)
     return rescue_list
 
-def calculate_closest_point(nodeA: Node, nodeB: Node, target: Node):
+
+def get_closest_point(line: tuple[Node, Node], target: Node) -> Node:
     pass
+
+
+def closest_point_distance(line: tuple[Node, Node], target: Node) -> float:
+    A, B, C = get_standard_form(line)
+    return abs(A * target.x + B * target.y + C) / math.sqrt(A * A + B * B)
+
+
+def get_standard_form(line: tuple[Node, Node]) -> (float, float, float):
+    node0, node1 = line
+    A = node0.y - node1.y
+    B = node1.x - node0.x
+    C = (node1.y - node0.y) * node0.x - (node1.x - node0.x) * node0.y
+    return A, B, C
