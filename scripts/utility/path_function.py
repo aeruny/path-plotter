@@ -7,7 +7,7 @@ import re
 # Node Class
 class Node:
     def __init__(self, coordinate: tuple = (0, 0, 0), time: float = 0.0, label: str = "",
-                 unity_coordinate: bool = True):
+                 unity_coordinate: bool = False):
         self.coordinate = coordinate
         self.x = coordinate[0]
         self.y = coordinate[1] if not unity_coordinate else coordinate[2]
@@ -73,7 +73,7 @@ class Graph:
         return x, y, z, labels
 
 
-def read_path_file(file: str):
+def read_path_file(file: str) -> Graph:
     # Open the data file
     if not os.path.exists(file):
         raise Exception("The file was not be found")
@@ -84,12 +84,12 @@ def read_path_file(file: str):
         # Store the node and time lists
         coordinates, times = parse_data(data_str_list)
         labels = ["Time: " + str(time) for time in times]
-        nodes = coordinates_to_nodes(coordinates, times, labels)
+        nodes = unity_coordinates_to_nodes(coordinates, times, labels)
         graph = Graph(nodes)
         return graph
 
 
-def create_graph(file: str):
+def create_graph(file: str) -> Graph:
     # Open the data file
     if not os.path.exists(file):
         raise Exception("The file was not be found")
@@ -100,7 +100,7 @@ def create_graph(file: str):
         # Store the node and time lists
         coordinates, times = parse_data(data_str_list)
         labels = ["Node " + str(i) for i in range(len(coordinates))]
-        nodes = coordinates_to_nodes(coordinates, times, labels)
+        nodes = unity_coordinates_to_nodes(coordinates, times, labels)
         graph = Graph(nodes)
         return graph
 
@@ -264,11 +264,11 @@ def prim(graph, start_node):
     return tree
 
 
-# wrap_coordinates: 3D Vector to Node Converter
-# param: coordinates[3D Vector]
-# return: Node
-def coordinates_to_nodes(coordinates: list[tuple[float]], times: list[float], labels: list[str]) -> list[Node]:
-    return [Node(coordinate, time, label) for coordinate, time, label in zip(coordinates, times, labels)]
+# unity_coordinates_to_nodes: 3D Vector to Node Converter
+# param: coordinates, times, labels
+# return: node_list
+def unity_coordinates_to_nodes(coordinates: list[tuple[float]], times: list[float], labels: list[str]) -> list[Node]:
+    return [Node(coordinate, time, label, unity_coordinate=True) for coordinate, time, label in zip(coordinates, times, labels)]
 
 
 def nodes_to_coordinates(path: list[Node]):
