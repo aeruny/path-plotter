@@ -1,5 +1,3 @@
-import os
-from utility.path_plotter import *
 from utility.path_plotter import *
 
 player_src_dir = "data/calibrated_player"

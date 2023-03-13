@@ -38,25 +38,25 @@ class PathAnalysisTest(unittest.TestCase):
     def test_closest_point_distance3D(self):
         horizontal_line = Node((0, 0, 0)), Node((100, 0, 0))
         point = Node((50, 100, 0))
-        test_value = closest_point_distance3D(horizontal_line, point)
+        test_value = closest_point_distance(horizontal_line, point)
         true_value = 100
         self.assertEqual(true_value, test_value)
 
         line = Node((0, 0, 0)), Node((100, 100, 0))
         point = Node((0, 100, 0))
-        test_value = closest_point_distance3D(line, point)
+        test_value = closest_point_distance(line, point)
         true_value = math.sqrt(100 * 100 + 100 * 100) / 2
         self.assertEqual(true_value, test_value)
 
         line = Node((0, 0, 0)), Node((100, 100, 100))
         point = Node((0, 100, 0))
-        test_value = closest_point_distance3D(line, point)
+        test_value = closest_point_distance(line, point)
         true_value = math.sqrt(100 * 100 + 100 * 100) / 2
         #self.assertEqual(true_value, test_value)
 
         line = Node((0, 0, 0)), Node((100, 100, 100))
         point = Node((150, 150, 150))
-        test_value = closest_point_distance3D(line, point)
+        test_value = closest_point_distance(line, point)
         true_value = math.sqrt(200 * 200 + 200 * 200 + 200 * 200)
         self.assertEqual(true_value, test_value)
 

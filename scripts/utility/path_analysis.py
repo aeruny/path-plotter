@@ -1,4 +1,8 @@
 # This script is responsible for human path to drone path analysis
+from typing import Union
+
+import pandas as pd
+
 from utility import vector
 from utility.path_function import *
 
@@ -14,7 +18,7 @@ from utility.path_function import *
 
 def path_deviation(hostage_positions: list[Node], player_path: list[Node]):
     # 1. Determine the ideal path
-    ideal_path = {}
+    # ideal_path =
 
     # 2. Determine the player's order of hostage rescue
     rescue_order = extract_rescue_order(hostage_positions, player_path, 10)
@@ -40,11 +44,7 @@ def extract_rescue_order(hostage_nodes: list[Node], player_path: list[Node], thr
     return rescue_list
 
 
-def get_closest_point(line: tuple[Node, Node], target: Node) -> Node:
-    pass
-
-
-def closest_point_distance(line: tuple[Node, Node], target: Node) -> float:
+def closest_point_distance2D(line: tuple[Node, Node], target: Node) -> float:
     A, B, C = get_standard_form(line)
     return abs(A * target.x + B * target.y + C) / math.sqrt(A * A + B * B)
 
@@ -56,30 +56,50 @@ def get_standard_form(line: tuple[Node, Node]) -> (float, float, float):
     C = (node1.y - node0.y) * node0.x - (node1.x - node0.x) * node0.y
     return A, B, C
 
-def closest_point_in_line(line: tuple[Node, Node], point: Node) -> Node:
-    u = vector.subtract(line[1], line[0])   # Line vector: Q-P
-    v = vector.subtract(point, line[0])     # Point to Line vector:X-P
+
+def get_closest_point(line: tuple[Node, Node], point: Node) -> Node:
+    u = vector.subtract(line[1], line[0])  # Line vector: Q-P
+    v = vector.subtract(point, line[0])  # Point to Line vector:X-P
 
     proj_param = vector.dot_product(u, v) / vector.dot_product(u, u)  # projection parameter: (Q-P)*(X-P) / (X-P)(X-P)
-
-
-def closest_point_distance3D(line: tuple[Node, Node], point: Node) -> float:
-    u = vector.subtract(line[1], line[0])       # Line vector: Q-P
-    v = vector.subtract(point, line[0])         # Point to Line vector:X-P
-
-    proj_param = vector.dot_product(u, v) / vector.dot_product(u, u)      # projection parameter: (Q-P)*(X-P) / (X-P)(X-P)
     print(f"Projection Parameter: {proj_param}")
     if proj_param < 0:
-        shortest_vector = vector.subtract(line[0], point)
-        dist = vector.norm(shortest_vector)
+        return line[0]
     elif proj_param <= 1:
-        proj_vector = vector.add(line[0], vector.multiply(proj_param, u))         # projection vector: projv(u)
-        shortest_vector = vector.subtract(proj_vector, point)                     # shortest distance vector: proj_v-P
-        dist = vector.norm(shortest_vector)                                           # shortest distance
+        return vector.add(line[0], vector.multiply(proj_param, u))  # projection vector: projv(u)
     else:
-        shortest_vector = vector.subtract(line[0], point)
-        dist = vector.norm(shortest_vector)
-    return dist
+        return vector.subtract(line[1], point)
 
-# Calibrated path
 
+def closest_point_distance(line: tuple[Node, Node], point: Node) -> float:
+    closest_point = get_closest_point(line, point)
+    distance_vector = vector.subtract(point, closest_point)
+    return vector.norm(distance_vector)
+
+
+def target_distances_pandas(path: list[Node], targets: list[Node]):
+    data_list = []
+    for node in path:
+        row = [node.time]
+        for target in targets:
+            row.append(distance3D(node, target))
+        data_list.append(row)
+
+    return pd.DataFrame(data_list, columns=["Timestep"] +
+                                           [f"Target {i + 1}" for i in range(len(targets))])
+
+
+def nearest_neighbor(path: list[Node], targets: list[Node]) -> list[list[Union[float, Node]]]:
+    data_list = []
+    for node in path:
+        distance_dict = {}
+        for i, target in enumerate(targets):
+            distance_dict[target] = distance3D(node, target)
+        target = min(distance_dict, key=distance_dict.get)
+        data_list.append([node.time, target, distance_dict[target]])
+    return data_list
+
+
+def nearest_neighbor_pandas(path: list[Node], targets: list[Node]) -> pd.DataFrame:
+    data_list = nearest_neighbor(path, targets)
+    return pd.DataFrame(data_list, columns=["Timestep", "Nearest Target", "Distance"])
