@@ -1,4 +1,5 @@
 # This script is responsible for human path to drone path analysis
+from utility import vector
 from utility.path_function import *
 
 
@@ -6,7 +7,7 @@ from utility.path_function import *
 #       Input: player_path: list[Node], hostage_positions: list[Node]
 #       Output: deviation_distance_list: list[float]
 #       1. Determine the ideal path (straight line for now)
-#       2. Determine the next hostage the player rescues
+#       2. Determine the next hostage the player rescued
 #       3. Find the point in a straight-line path to the hostage position closest to the player
 #       4. Calculate the distance between the point and the player
 #       5. Record the distance in a txt file
@@ -54,3 +55,31 @@ def get_standard_form(line: tuple[Node, Node]) -> (float, float, float):
     B = node1.x - node0.x
     C = (node1.y - node0.y) * node0.x - (node1.x - node0.x) * node0.y
     return A, B, C
+
+def closest_point_in_line(line: tuple[Node, Node], point: Node) -> Node:
+    u = vector.subtract(line[1], line[0])   # Line vector: Q-P
+    v = vector.subtract(point, line[0])     # Point to Line vector:X-P
+
+    proj_param = vector.dot_product(u, v) / vector.dot_product(u, u)  # projection parameter: (Q-P)*(X-P) / (X-P)(X-P)
+
+
+def closest_point_distance3D(line: tuple[Node, Node], point: Node) -> float:
+    u = vector.subtract(line[1], line[0])       # Line vector: Q-P
+    v = vector.subtract(point, line[0])         # Point to Line vector:X-P
+
+    proj_param = vector.dot_product(u, v) / vector.dot_product(u, u)      # projection parameter: (Q-P)*(X-P) / (X-P)(X-P)
+    print(f"Projection Parameter: {proj_param}")
+    if proj_param < 0:
+        shortest_vector = vector.subtract(line[0], point)
+        dist = vector.norm(shortest_vector)
+    elif proj_param <= 1:
+        proj_vector = vector.add(line[0], vector.multiply(proj_param, u))         # projection vector: projv(u)
+        shortest_vector = vector.subtract(proj_vector, point)                     # shortest distance vector: proj_v-P
+        dist = vector.norm(shortest_vector)                                           # shortest distance
+    else:
+        shortest_vector = vector.subtract(line[0], point)
+        dist = vector.norm(shortest_vector)
+    return dist
+
+# Calibrated path
+
