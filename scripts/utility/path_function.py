@@ -6,12 +6,11 @@ import re
 
 # Node Class
 class Node:
-    def __init__(self, coordinate: tuple = (0, 0, 0), time: float = 0.0, label: str = "",
-                 unity_coordinate: bool = False):
+    def __init__(self, coordinate: tuple[float, float, float] = (0, 0, 0), time: float = 0.0, label: str = ""):
         self.coordinate = coordinate
         self.x = coordinate[0]
-        self.y = coordinate[1] if not unity_coordinate else coordinate[2]
-        self.z = coordinate[2] if not unity_coordinate else coordinate[1]
+        self.y = coordinate[1]
+        self.z = coordinate[2]
         self.label = label
         self.time = time
         self.neighbors = []
@@ -72,40 +71,46 @@ class Graph:
             labels.append(node.label)
         return x, y, z, labels
 
+    def size(self):
+        return len(self.nodes)
 
-def read_path_file(file: str) -> Graph:
-    # Open the data file
+
+def get_player_path(file: str) -> Graph:
+    coordinates, times = read_file(file)
+    labels = [f"Time: {str(time)}" for time in times]
+
+    nodes = unity_coordinates_to_nodes(coordinates, times, labels)
+    graph = Graph(nodes)
+    return graph
+
+
+def get_drone_path(file: str) -> Graph:
+    coordinates, times = read_file(file)
+    coordinates = [(-float(coordinate[0]), float(coordinate[1]), -float(coordinate[2])) for coordinate in coordinates]
+    labels = [f"Time: {str(time)}" for time in times]
+
+    nodes = unity_coordinates_to_nodes(coordinates, times, labels)
+    graph = Graph(nodes)
+    return graph
+
+
+def get_node_graph(file: str) -> Graph:
+    coordinates, times = read_file(file)
+    labels = [f"Node {str(i)}" for i in range(len(coordinates))]
+    nodes = unity_coordinates_to_nodes(coordinates, times, labels)
+    graph = Graph(nodes)
+    return graph
+
+
+def read_file(file: str) -> (list[tuple[float, float, float]], list[str]):
     if not os.path.exists(file):
         raise Exception("The file was not be found")
     with open(file, "r") as txt:
-        # Split data
         data_str_list = [line.rstrip() for line in txt.readlines()]
-
-        # Store the node and time lists
-        coordinates, times = parse_data(data_str_list)
-        labels = ["Time: " + str(time) for time in times]
-        nodes = unity_coordinates_to_nodes(coordinates, times, labels)
-        graph = Graph(nodes)
-        return graph
+        return parse_data(data_str_list)
 
 
-def create_graph(file: str) -> Graph:
-    # Open the data file
-    if not os.path.exists(file):
-        raise Exception("The file was not be found")
-    with open(file, "r") as txt:
-        # Split data
-        data_str_list = [line.rstrip() for line in txt.readlines()]
-
-        # Store the node and time lists
-        coordinates, times = parse_data(data_str_list)
-        labels = ["Node " + str(i) for i in range(len(coordinates))]
-        nodes = unity_coordinates_to_nodes(coordinates, times, labels)
-        graph = Graph(nodes)
-        return graph
-
-
-def parse_data(data_str_list: list[str]) -> (list[tuple[float]], list[str]):
+def parse_data(data_str_list: list[str]) -> (list[tuple[float, float, float]], list[str]):
     pattern = re.compile(
         r"\((?P<coord_x>.*),(?P<coord_y>.*),(?P<coord_z>.*)\),(?P<time>.*)")
     coordinates = []
@@ -267,8 +272,15 @@ def prim(graph, start_node):
 # unity_coordinates_to_nodes: 3D Vector to Node Converter
 # param: coordinates, times, labels
 # return: node_list
-def unity_coordinates_to_nodes(coordinates: list[tuple[float]], times: list[float], labels: list[str]) -> list[Node]:
-    return [Node(coordinate, time, label, unity_coordinate=True) for coordinate, time, label in zip(coordinates, times, labels)]
+def unity_coordinates_to_nodes(coordinates: list[tuple], times: list[float], labels: list[str] = None) -> list[Node]:
+    return [unity_coordinate_to_node(coordinate, time, label) for coordinate, time, label in
+            zip(coordinates, times, labels)]
+
+def unity_coords_to_nodes(coordinates: list[tuple]):
+    return [unity_coordinate_to_node(coordinate) for coordinate in coordinates]
+
+def unity_coordinate_to_node(coordinate: tuple[float, float, float], time: float = 0, label: str = "") -> Node:
+    return Node((coordinate[0], coordinate[2], coordinate[1]), time, label)
 
 
 def nodes_to_coordinates(path: list[Node]):
@@ -323,7 +335,7 @@ def print_path_coordinates(path: list[Node]):
 # private utility function
 # params: coordA[3D vector], coordB[3D vector]
 # return: float
-def __distance3D(coordA: tuple[float], coordB: tuple[float]) -> float:
+def __distance3D(coordA: tuple, coordB: tuple) -> float:
     return math.sqrt(sum([(a - b) * (a - b) for a, b in zip(coordA, coordB)]))
 
 
@@ -331,5 +343,5 @@ def __distance3D(coordA: tuple[float], coordB: tuple[float]) -> float:
 # private utility function
 # params: coordA[3D vector], coordB[3D vector]
 # return: float
-def __distance2D(coordA: tuple[float], coordB: tuple[float]) -> float:
+def __distance2D(coordA: tuple, coordB: tuple) -> float:
     return math.sqrt(pow(coordA[0] - coordB[0], 2) + pow(coordA[1] - coordB[1], 2))

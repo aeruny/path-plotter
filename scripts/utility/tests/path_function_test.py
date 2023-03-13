@@ -1,6 +1,7 @@
 import os.path
 import unittest
-from path_function import *
+
+from utility.path_function import *
 
 
 class PathFunctionTest(unittest.TestCase):
@@ -19,7 +20,7 @@ class PathFunctionTest(unittest.TestCase):
         self.assertEqual(true_value, test_value)
 
         true_value = "test node"
-        test_node = Node((0, 0, 0), "test node")
+        test_node = Node((0, 0, 0), 0, "test node")
         test_value = test_node.label
         self.assertEqual(true_value, test_value)
 
@@ -28,7 +29,7 @@ class PathFunctionTest(unittest.TestCase):
         nodeB = Node((-100, -100, 0))
         nodeC = Node((1000, 2000, 0))
         true_value = [nodeA, nodeB, nodeC]
-        test_node = Node((0, 0, 0), "test node")
+        test_node = Node((0, 0, 0), 0, "test node")
         test_node.add_neighbors([nodeA, nodeB, nodeC])
         test_value = test_node.neighbors
         self.assertListEqual(true_value, test_value)
@@ -40,7 +41,7 @@ class PathFunctionTest(unittest.TestCase):
         true_value = (0, 0, 0)
         data_file = "data\hostageLocations.txt"
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), data_file)
-        graph = create_graph(path)
+        graph = get_node_graph(path)
         test_value = graph.nodes[0].coordinate
         self.assertEqual(true_value, test_value)
 
@@ -105,9 +106,9 @@ class PathFunctionTest(unittest.TestCase):
         self.assertEqual(true_value, test_value)
 
     def test_dijkstra(self):
-        nodes = [Node((0, 0, 0), "nodeO"), Node((100, 100, 100), "nodeA"), Node((-100, -100, -100), "nodeB"),
-                 Node((150, 300, 450), "nodeC"), Node((-200, -400, 500), "nodeD"), Node((450, -500, -400), "nodeE"),
-                 Node((-250, 200, 300), "nodeF"), Node((-200, 250, 300), "nodeG")]
+        nodes = [Node((0, 0, 0), 0, "nodeO"), Node((100, 100, 100), 0, "nodeA"), Node((-100, -100, -100), 0, "nodeB"),
+                 Node((150, 300, 450), 0, "nodeC"), Node((-200, -400, 500), 0, "nodeD"), Node((450, -500, -400), 0, "nodeE"),
+                 Node((-250, 200, 300), 0, "nodeF"), Node((-200, 250, 300), 0, "nodeG")]
         graph = Graph(nodes)
 
         true_value = [nodes[0], nodes[-1]]
