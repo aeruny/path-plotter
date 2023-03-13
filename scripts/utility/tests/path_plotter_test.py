@@ -1,6 +1,10 @@
 import unittest
-from path_function import *
-from path_plotter import PathPlotter
+
+from utility.path_plotter import PathPlotter
+
+
+def read_path_file(param):
+    pass
 
 
 class PathPlotterTest(unittest.TestCase):

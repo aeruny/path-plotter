@@ -1,10 +1,10 @@
-from path_function import *
+from utility.path_function import *
 from utility.path_plotter import PathPlotter
 
 data_file = "data\hostageLocations.txt"
 path = os.path.join(os.path.dirname(os.path.dirname(__file__)), data_file)
 
-graph = create_graph(path)
+graph = get_node_graph(path)
 graph.apply_complete_connection()
 # print_path(graph.nodes)
 
