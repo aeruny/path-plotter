@@ -1,6 +1,7 @@
 # This script is used for fixing issues with data files
 from utility import vector
 from utility.path_function import *
+from utility.path_plotter import *
 import numpy as np
 
 
@@ -44,22 +45,22 @@ def calibrate_data_file(source_file: str, dest_file: str, translation, rotation)
 
 
 if __name__ == "__main__":
-    base_path = "..\\"
+    base_path = "../"
 
-    player_src_dir = os.path.join(base_path, "data\\player")
-    player_dest_dir = os.path.join(base_path, "data\\calibrated_player")
-    player_translation = (6.04, -20.47, -21.14)
+    player_src_dir = os.path.join(base_path, "data/player")
+    player_dest_dir = os.path.join(base_path, "data/calibrated_player")
+    player_translation = (6.04 - 5.5, -20.47, -21.14 + 12)  # (6.04, -20.47, -21.14)
     player_rotation = (0, 32.7, 0)
-
     for file in os.listdir(player_src_dir):
         calibrate_data_file(os.path.join(player_src_dir, file), os.path.join(player_dest_dir, file), player_translation,
                             player_rotation)
 
-    drone_src_dir = os.path.join(base_path, "data\\drone")
-    drone_dest_dir = os.path.join(base_path, "data\\calibrated_drone")
-    drone_translation = (-9.15, -10.84, 8.32)
-    drone_rotation = (0, -174.52, 0)
-    for file in os.listdir(drone_src_dir):
-        drone_translation = (-9.15, -10.84, 8.32)
-        calibrate_data_file(os.path.join(drone_src_dir, file), os.path.join(drone_dest_dir, file), drone_translation,
-                            drone_rotation)
+    # Drone Calibration
+    # drone_src_dir = os.path.join(base_path, "data/drone")
+    # drone_dest_dir = os.path.join(base_path, "data/calibrated_drone")
+    # drone_translation = (-9.15, -10.84, 8.32)
+    # drone_rotation = (0, -174.52, 0)
+    # for file in os.listdir(drone_src_dir):
+    #     drone_translation = (-9.15, -10.84, 8.32)
+    #     calibrate_data_file(os.path.join(drone_src_dir, file), os.path.join(drone_dest_dir, file), drone_translation,
+    #                         drone_rotation)

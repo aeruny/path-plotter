@@ -7,7 +7,7 @@ from utility.path_function import *
 class PathAnalysisTest(unittest.TestCase):
     def test_extract_rescue_order(self):
         hostage_nodes = get_node_graph("../../data/hostageLocations.txt").nodes
-        player_path = get_player_path("../../data/player/001_playerMovements.txt").nodes
+        player_path = get_player_path("../../data/calibrated_player/001_playerMovements.txt").nodes
         test_value = extract_rescue_order(hostage_nodes, player_path, threshold=5)
         print_path(test_value)
 

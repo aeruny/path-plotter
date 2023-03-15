@@ -18,7 +18,7 @@ from utility.path_function import *
 
 def path_deviation(hostage_positions: list[Node], player_path: list[Node]):
     # 1. Determine the ideal path
-    # ideal_path =
+    #ideal_path =
 
     # 2. Determine the player's order of hostage rescue
     rescue_order = extract_rescue_order(hostage_positions, player_path, 10)
@@ -29,9 +29,16 @@ def path_deviation(hostage_positions: list[Node], player_path: list[Node]):
 
     # 5. Record the distance in a txt file
 
+# Calculates the path deviation from the ideal path
+def path_deviation_ideal(player_paths: list[list[Node]], ideal_path: list[Node]):
+     # data_list = []
+     # for path in player_paths:
+     pass
 
-def extract_rescue_order(hostage_nodes: list[Node], player_path: list[Node], threshold: float = 1) -> list[Node]:
+
+def extract_rescue_order(hostage_nodes: list[Node], player_path: list[Node], threshold: float = 1):
     rescue_list = []
+    time_list = []
     for player_node in player_path:
         threshold_list = []
         for hostage_node in hostage_nodes:
@@ -41,7 +48,8 @@ def extract_rescue_order(hostage_nodes: list[Node], player_path: list[Node], thr
             rescued_hostage = min(threshold_list, key=lambda x: distance3D(x, player_node))
             if rescued_hostage not in rescue_list:
                 rescue_list.append(rescued_hostage)
-    return rescue_list
+                time_list.append(player_node.time)
+    return rescue_list, time_list
 
 
 def closest_point_distance2D(line: tuple[Node, Node], target: Node) -> float:
@@ -93,13 +101,30 @@ def nearest_neighbor(path: list[Node], targets: list[Node]) -> list[list[Union[f
     data_list = []
     for node in path:
         distance_dict = {}
-        for i, target in enumerate(targets):
+        for target in targets:
             distance_dict[target] = distance3D(node, target)
         target = min(distance_dict, key=distance_dict.get)
         data_list.append([node.time, target, distance_dict[target]])
     return data_list
 
 
-def nearest_neighbor_pandas(path: list[Node], targets: list[Node]) -> pd.DataFrame:
+def nearest_neighbor_list(path: list[Node], targets: list[Node]) -> pd.DataFrame:
     data_list = nearest_neighbor(path, targets)
     return pd.DataFrame(data_list, columns=["Timestep", "Nearest Target", "Distance"])
+
+
+def nearest_neighbor_table(paths: list[list[Node]], targets: list[Node]) -> list[pd.DataFrame]:
+    data_list = []
+    for path in paths:
+        data_list.append(nearest_neighbor_list(path, targets))
+    return data_list
+
+
+def path_list_pandas(paths: list[list[Node]]) -> list[pd.DataFrame]:
+    df_list = []
+    for path in paths:
+        path_data = []
+        for node in path:
+            path_data.append([node.time, node.x, node.y, node.z])
+        df_list.append(pd.DataFrame(path_data, columns=["Timestep", "x", "y", "z"]))
+    return df_list
