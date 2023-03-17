@@ -1,5 +1,6 @@
 import unittest
 
+from os.path import join
 from utility.path_plotter import *
 from utility.path_analysis import *
 
@@ -41,34 +42,51 @@ class ResearchResults(unittest.TestCase):
         # Obtain the Nearest Neighbor Path
         self.ideal_path_nn: list[Node] = nearest_neighbor(self.hostage_graph, Node((0, 0, 0)))
 
-
-
-
-    def test_path_to_target_table(self):
-        table = target_distances_pandas(self.player_paths[0], self.hostage_graph.nodes)
+    def test_path_to_target_df(self):
+        table = target_distances_df(self.player_paths[0], self.hostage_graph.nodes)
         print(table)
         table.to_csv(os.path.join(self.result_file_path, "participant001_target_distance_table.csv"))
 
     def test_nearest_neighbor_table(self):
-        table = nearest_neighbor_list(self.player_paths[0], self.hostage_graph.nodes)
+        table = generate_nearest_target_distance_df(self.player_paths[0], self.hostage_graph.nodes)
         print(table)
         table.to_csv(os.path.join(self.result_file_path, "participant001_nearest_neighbor_table.csv"))
 
+    def test_deviation_nearest_target_table(self):
+        destination_path = "results/nearest_target_distance"
+        df_table = generate_nearest_neighbor_table(self.player_paths, self.hostage_graph.nodes)
+        for i, table in enumerate(df_table):
+            table.to_csv(join(destination_path, f"participant_{(i + 1):03}_nearest_target_distance.csv"), index=False)
+
     def test_nearest_neighbor_graph(self):
-        table = nearest_neighbor_list(self.player_paths[0], self.hostage_graph.nodes)
+        table = generate_nearest_target_distance_df(self.player_paths[0], self.hostage_graph.nodes)
         table.plot.line(x='Timestep', y='Distance')
         plt.show()
 
-    def test_path_list(self):
-        list = path_list_pandas(self.player_paths)
+    def test_path_df(self):
+        path_list = path_df(self.player_paths)
         print(list)
-        print(f"{list[0]}")
 
-    def test_path_deviation_ideal(self):
-        path_deviation_ideal(self.player_paths)
+    def test_rescue_order(self):
+        rescue_order_list = []
+        for path in self.player_paths:
+            individual_list = get_rescue_order(path, self.hostage_graph.nodes, 10)
+            rescue_order_list.append(individual_list)
+            print_path(individual_list)
+        print(len(rescue_order_list))
 
+    def test_generate_rescue_order_table(self):
+        table, table_with_time = generate_rescue_order_tables(self.player_paths, self.hostage_graph.nodes, 10)
+        print(table.head())
+        table.to_csv(join(self.result_file_path, "rescue_order_table.csv"), index=False)
+        table_with_time.to_csv(join(self.result_file_path, "rescue_order_table_with_time.csv"), index=False)
 
-
+    def test_generate_deviation_nearest_point_distance(self):
+        destination_path = "results/nearest_point_distance"
+        df_table = generate_deviation_nearest_point_distance_df_list(self.player_paths, self.hostage_graph.nodes,
+                                                                     threshold=5)
+        for i, table in enumerate(df_table):
+            table.to_csv(join(destination_path, f"participant_{(i + 1):03}_nearest_point_distance.csv"), index=False)
 
 
 if __name__ == '__main__':

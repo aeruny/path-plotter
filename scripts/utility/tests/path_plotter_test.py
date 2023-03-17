@@ -14,7 +14,7 @@ class PathPlotterTest(unittest.TestCase):
     # TODO: Test No Input Failure
 
     def test_plot2D(self):
-        file = read_path_file("../data/001_playerMovement.txt")
+        file = read_path_file("../data/calibrated_player/025_playerMovement.txt")
         plotter = PathPlotter()
         pass
 

@@ -21,13 +21,15 @@ class PathPlotter:
         plt.grid(True)
         plt.show()
 
-    def plot2D(self, plot_name: str, path: list[Node], graph: Graph = None):
+    def plot2D(self, plot_name: str, path: list[Node], graph: Graph = None, unity_coordinate = False):
         # Plot Design
         # plt.xlim(-self.plot_size[0]//2, self.plot_size[0]//2)
         # plt.ylim(-self.plot_size[1]//2, self.plot_size[1]//2)
-        x_lim, y_lim = self.__get_center_limits(path, offset=50)
-        plt.xlim(x_lim[0], x_lim[1])
-        plt.ylim(y_lim[0], y_lim[1])
+        if not unity_coordinate:
+            x_lim, y_lim = self.__get_center_limits(path, offset=50)
+            plt.xlim(x_lim[0], x_lim[1])
+            plt.ylim(y_lim[0], y_lim[1])
+
 
         plt.axhline(y=0, color="black", linestyle="-")
         plt.axvline(x=0, color="black", linestyle="-")
@@ -39,14 +41,16 @@ class PathPlotter:
         if graph is not None:
             g_x, g_y, labels = graph.to_coordinates2D()
             plt.plot(g_x, g_y, linestyle='None', color='red', marker='.', markersize=10.0)
-            labels = [i for i in range(len(labels))]
-            if self.label_on:
-                for x, y, label in zip(g_x, g_y, labels):
-                    plt.annotate(label, (x, y))
+            labels = [i + 1 for i in range(len(labels))]
+            for x, y, label in zip(g_x, g_y, labels):
+                plt.annotate(label, (x, y))
 
         # Plot Path
         p_x, p_y, p_z = nodes_to_coordinates(path)
+        if unity_coordinate:
+            p_x, p_y, p_z = nodes_to_unity_coordinates(path)
         plt.plot(p_x, p_y, linestyle='-', color='blue', markersize=10.0)
+
 
         plt.grid(True)
         plt.show()

@@ -75,6 +75,13 @@ class Graph:
         return len(self.nodes)
 
 
+class Path():
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+        self.name = os.path.basename(file_path)
+        self.nodes = []
+
+
 def get_player_path(file: str) -> Graph:
     coordinates, times = read_file(file)
     labels = [f"Time: {str(time)}" for time in times]
@@ -82,6 +89,14 @@ def get_player_path(file: str) -> Graph:
     nodes = unity_coordinates_to_nodes(coordinates, times, labels)
     graph = Graph(nodes)
     return graph
+
+
+def get_all_player_path(dir_path: str) -> list[list[Node]]:
+    player_paths: list[list[Node]] = []
+    for file in os.listdir(dir_path):
+        file_path = os.path.join(dir_path, file)
+        player_paths.append(get_player_path(file_path).nodes)
+    return player_paths
 
 
 def get_drone_path(file: str) -> Graph:
@@ -96,13 +111,13 @@ def get_drone_path(file: str) -> Graph:
 
 def get_node_graph(file: str) -> Graph:
     coordinates, times = read_file(file)
-    labels = [f"Node {str(i)}" for i in range(len(coordinates))]
+    labels = [f"Hostage {str(i + 1)}" for i in range(len(coordinates))]
     nodes = unity_coordinates_to_nodes(coordinates, times, labels)
     graph = Graph(nodes)
     return graph
 
 
-def read_file(file: str) -> (list[tuple[float, float, float]], list[str]):
+def read_file(file: str) -> (list[tuple[float, float, float]], list[float]):
     if not os.path.exists(file):
         raise Exception("The file was not be found")
     with open(file, "r") as txt:
@@ -110,7 +125,7 @@ def read_file(file: str) -> (list[tuple[float, float, float]], list[str]):
         return parse_data(data_str_list)
 
 
-def parse_data(data_str_list: list[str]) -> (list[tuple[float, float, float]], list[str]):
+def parse_data(data_str_list: list[str]) -> (list[tuple[float, float, float]], list[float]):
     pattern = re.compile(
         r"\((?P<coord_x>.*),(?P<coord_y>.*),(?P<coord_z>.*)\),(?P<time>.*)")
     coordinates = []
@@ -119,7 +134,7 @@ def parse_data(data_str_list: list[str]) -> (list[tuple[float, float, float]], l
         match = pattern.match(element)
         coordinates.append(
             (float(match.group("coord_x")), float(match.group("coord_y")), float(match.group("coord_z"))))
-        times.append(match.group("time"))
+        times.append(float(match.group("time")))
     return coordinates, times
 
 
@@ -276,8 +291,10 @@ def unity_coordinates_to_nodes(coordinates: list[tuple], times: list[float], lab
     return [unity_coordinate_to_node(coordinate, time, label) for coordinate, time, label in
             zip(coordinates, times, labels)]
 
+
 def unity_coords_to_nodes(coordinates: list[tuple]):
     return [unity_coordinate_to_node(coordinate) for coordinate in coordinates]
+
 
 def unity_coordinate_to_node(coordinate: tuple[float, float, float], time: float = 0, label: str = "") -> Node:
     return Node((coordinate[0], coordinate[2], coordinate[1]), time, label)
@@ -289,6 +306,15 @@ def nodes_to_coordinates(path: list[Node]):
         x.append(node.x)
         y.append(node.y)
         z.append(node.z)
+    return x, y, z
+
+
+def nodes_to_unity_coordinates(path: list[Node]):
+    x, y, z = [], [], []
+    for node in path:
+        x.append(node.x)
+        y.append(node.z)
+        z.append(node.y)
     return x, y, z
 
 

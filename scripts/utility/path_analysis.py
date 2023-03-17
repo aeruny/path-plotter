@@ -18,10 +18,10 @@ from utility.path_function import *
 
 def path_deviation(hostage_positions: list[Node], player_path: list[Node]):
     # 1. Determine the ideal path
-    #ideal_path =
+    # ideal_path =
 
     # 2. Determine the player's order of hostage rescue
-    rescue_order = extract_rescue_order(hostage_positions, player_path, 10)
+    rescue_order = get_rescue_order(hostage_positions, player_path, 10)
 
     # 3. Find the closest point to the player in the ideal path to the next hostage
 
@@ -29,14 +29,13 @@ def path_deviation(hostage_positions: list[Node], player_path: list[Node]):
 
     # 5. Record the distance in a txt file
 
+
 # Calculates the path deviation from the ideal path
 def path_deviation_ideal(player_paths: list[list[Node]], ideal_path: list[Node]):
-     # data_list = []
-     # for path in player_paths:
-     pass
+    pass  # return extract_rescue_order()
 
 
-def extract_rescue_order(hostage_nodes: list[Node], player_path: list[Node], threshold: float = 1):
+def get_rescue_order(player_path: list[Node], hostage_nodes: list[Node], threshold: float) -> (list[Node], list[float]):
     rescue_list = []
     time_list = []
     for player_node in player_path:
@@ -45,11 +44,30 @@ def extract_rescue_order(hostage_nodes: list[Node], player_path: list[Node], thr
             if distance3D(player_node, hostage_node) <= threshold:
                 threshold_list.append(hostage_node)
         if len(threshold_list) > 0:
-            rescued_hostage = min(threshold_list, key=lambda x: distance3D(x, player_node))
+            rescued_hostage = min(threshold_list, key=lambda h_candidate: distance3D(h_candidate, player_node))
             if rescued_hostage not in rescue_list:
                 rescue_list.append(rescued_hostage)
                 time_list.append(player_node.time)
     return rescue_list, time_list
+
+
+def generate_rescue_order_tables(player_paths: list[list[Node]], hostage_nodes: list[Node], threshold: float):
+    rescue_data_list = []
+    rescue_data_list_t = []
+    for i, path in enumerate(player_paths):
+        rescue_order, time_list = get_rescue_order(path, hostage_nodes, threshold)
+        rescue_data_row = [i + 1]
+        rescue_data_row_t = [i + 1]
+        for rescued_hostage, time in zip(rescue_order, time_list):
+            rescue_data_row.append(int(rescued_hostage.label.split(' ')[-1]))
+            rescue_data_row_t.append(int(rescued_hostage.label.split(' ')[-1]))
+            rescue_data_row_t.append(time)
+        rescue_data_list.append(rescue_data_row)
+        rescue_data_list_t.append(rescue_data_row_t)
+    table = pd.DataFrame(rescue_data_list, columns=["Participant"] + [f"Rescue {i + 1}" for i in range(15)])
+    table_with_time = pd.DataFrame(rescue_data_list_t,
+                                   columns=["Participant"] + ["Hostage" if x % 2 == 0 else "Time" for x in range(30)])
+    return table, table_with_time
 
 
 def closest_point_distance2D(line: tuple[Node, Node], target: Node) -> float:
@@ -70,7 +88,6 @@ def get_closest_point(line: tuple[Node, Node], point: Node) -> Node:
     v = vector.subtract(point, line[0])  # Point to Line vector:X-P
 
     proj_param = vector.dot_product(u, v) / vector.dot_product(u, u)  # projection parameter: (Q-P)*(X-P) / (X-P)(X-P)
-    print(f"Projection Parameter: {proj_param}")
     if proj_param < 0:
         return line[0]
     elif proj_param <= 1:
@@ -85,7 +102,7 @@ def closest_point_distance(line: tuple[Node, Node], point: Node) -> float:
     return vector.norm(distance_vector)
 
 
-def target_distances_pandas(path: list[Node], targets: list[Node]):
+def target_distances_df(path: list[Node], targets: list[Node]):
     data_list = []
     for node in path:
         row = [node.time]
@@ -97,7 +114,7 @@ def target_distances_pandas(path: list[Node], targets: list[Node]):
                                            [f"Target {i + 1}" for i in range(len(targets))])
 
 
-def nearest_neighbor(path: list[Node], targets: list[Node]) -> list[list[Union[float, Node]]]:
+def deviation_nearest_target_distance(path: list[Node], targets: list[Node]) -> list[list[Union[float, Node]]]:
     data_list = []
     for node in path:
         distance_dict = {}
@@ -108,23 +125,56 @@ def nearest_neighbor(path: list[Node], targets: list[Node]) -> list[list[Union[f
     return data_list
 
 
-def nearest_neighbor_list(path: list[Node], targets: list[Node]) -> pd.DataFrame:
-    data_list = nearest_neighbor(path, targets)
+def generate_nearest_target_distance_df(path: list[Node], targets: list[Node]) -> pd.DataFrame:
+    data_list = deviation_nearest_target_distance(path, targets)
     return pd.DataFrame(data_list, columns=["Timestep", "Nearest Target", "Distance"])
 
 
-def nearest_neighbor_table(paths: list[list[Node]], targets: list[Node]) -> list[pd.DataFrame]:
-    data_list = []
-    for path in paths:
-        data_list.append(nearest_neighbor_list(path, targets))
-    return data_list
+def generate_nearest_neighbor_table(paths: list[list[Node]], targets: list[Node]) -> list[pd.DataFrame]:
+    return [generate_nearest_target_distance_df(path, targets) for path in paths]
 
 
-def path_list_pandas(paths: list[list[Node]]) -> list[pd.DataFrame]:
-    df_list = []
+def deviation_nearest_point_distance(path: list[Node], targets: list[Node], threshold: float = 5):
+    rescue_order, rescue_time = get_rescue_order(path, targets, threshold)
+
+    # The first node is the start location of the player
+    rescue_order.insert(0, path[0])
+
+    path_lines = [(rescue_order[i], rescue_order[i + 1]) for i in range(len(rescue_order) - 1)]
+    p_index = 0
+    path_distances = []
+    path_targets = []
+    # print(f"rescued count: {len(rescue_order)}")
+    # print_path(rescue_order)
+    # print(rescue_time)
+    for node in path:
+        path_distances.append(closest_point_distance(path_lines[p_index], node))
+        path_targets.append(int(str(rescue_order[p_index + 1]).split(" ")[-1]))
+        if node.time == rescue_time[p_index]:
+            # print(f"At path_i = {p_index} -> {rescue_order[p_index + 1]}")
+            p_index += 1
+            if p_index >= len(rescue_time):
+                # print(f"{node.label}: {len(path)}")
+                break
+    return path_distances, path_targets
+
+
+def generate_deviation_nearest_point_distance_df(path: list[Node], targets: list[Node], threshold: float = 5):
+    distance_list, target_list = deviation_nearest_point_distance(path, targets, threshold)
+    df_data_list = [[node.time, target, distance] for node, target, distance in zip(path, target_list, distance_list)]
+    return pd.DataFrame(df_data_list, columns=["Time", "Target", "Distance"])
+
+
+def generate_deviation_nearest_point_distance_df_list(paths: list[list[Node]], targets: list[Node],
+                                                      threshold: float = 5):
+    return [generate_deviation_nearest_point_distance_df(path, targets, threshold) for path in paths]
+
+
+def path_df(paths: list[list[Node]]) -> list[pd.DataFrame]:
+    path_df_list = []
     for path in paths:
         path_data = []
         for node in path:
             path_data.append([node.time, node.x, node.y, node.z])
-        df_list.append(pd.DataFrame(path_data, columns=["Timestep", "x", "y", "z"]))
-    return df_list
+        path_df_list.append(pd.DataFrame(path_data, columns=["Timestep", "x", "y", "z"]))
+    return path_df_list

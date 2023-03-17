@@ -31,14 +31,21 @@ def local_to_global_position(local_position: tuple, translation: tuple, rotation
     return tuple(global_point)
 
 
-def convert_local_to_global_positions(file: str, translation: tuple, rotation: tuple):
-    coordinates, time = read_file(file)
-    coordinates = [local_to_global_position(coordinate, translation, rotation) for coordinate in coordinates]
-    return coordinates, time
+def convert_local_to_global_positions(coordinates: list[tuple], translation: tuple, rotation: tuple):
+    new_coordinates = [local_to_global_position(coordinate, translation, rotation) for coordinate in coordinates]
+    return new_coordinates
+
+
+def zero_start_time(time: list[float]) -> list[float]:
+    start_time = time[0]
+    new_time = [t - start_time for t in time]
+    return new_time
 
 
 def calibrate_data_file(source_file: str, dest_file: str, translation, rotation):
-    coordinates, time = convert_local_to_global_positions(source_file, translation, rotation)
+    coordinates, time = read_file(source_file)
+    coordinates = convert_local_to_global_positions(coordinates, translation, rotation)
+    time = zero_start_time(time)
     with open(dest_file, "w") as dest:
         for coordinate, time in zip(coordinates, time):
             dest.write(f"({coordinate[0]},{coordinate[1]},{coordinate[2]}),{time}\n")
@@ -47,6 +54,7 @@ def calibrate_data_file(source_file: str, dest_file: str, translation, rotation)
 if __name__ == "__main__":
     base_path = "../"
 
+    # Player Path Calibration
     player_src_dir = os.path.join(base_path, "data/player")
     player_dest_dir = os.path.join(base_path, "data/calibrated_player")
     player_translation = (6.04 - 5.5, -20.47, -21.14 + 12)  # (6.04, -20.47, -21.14)
@@ -56,11 +64,11 @@ if __name__ == "__main__":
                             player_rotation)
 
     # Drone Calibration
-    # drone_src_dir = os.path.join(base_path, "data/drone")
-    # drone_dest_dir = os.path.join(base_path, "data/calibrated_drone")
-    # drone_translation = (-9.15, -10.84, 8.32)
-    # drone_rotation = (0, -174.52, 0)
-    # for file in os.listdir(drone_src_dir):
-    #     drone_translation = (-9.15, -10.84, 8.32)
-    #     calibrate_data_file(os.path.join(drone_src_dir, file), os.path.join(drone_dest_dir, file), drone_translation,
-    #                         drone_rotation)
+    drone_src_dir = os.path.join(base_path, "data/drone")
+    drone_dest_dir = os.path.join(base_path, "data/calibrated_drone")
+    drone_translation = (-9.15, -10.84, 8.32)
+    drone_rotation = (0, -174.52, 0)
+    for file in os.listdir(drone_src_dir):
+        drone_translation = (-9.15, -10.84, 8.32)
+        calibrate_data_file(os.path.join(drone_src_dir, file), os.path.join(drone_dest_dir, file), drone_translation,
+                            drone_rotation)
