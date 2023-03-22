@@ -79,7 +79,7 @@ class ResearchResults(unittest.TestCase):
 
     # Nearest Target Distance
 
-    def test_deviation_nearest_target_table(self):
+    def test_deviation_nearest_target_df_list(self):
         destination_path = "results/nearest_target_distance"
         df_list = generate_nearest_target_distance_df_list(self.player_paths, self.hostage_graph.nodes)
         for i, table in enumerate(df_list):

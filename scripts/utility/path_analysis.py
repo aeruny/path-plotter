@@ -121,7 +121,7 @@ def deviation_nearest_target_distance(path: list[Node], targets: list[Node]) -> 
         for target in targets:
             distance_dict[target] = distance3D(node, target)
         target = min(distance_dict, key=distance_dict.get)
-        data_list.append([node.time, target, distance_dict[target]])
+        data_list.append([node.time, target.label.split(' ')[-1], distance_dict[target]])
     return data_list
 
 
