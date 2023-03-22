@@ -16,7 +16,6 @@ if __name__ == "__main__":
     player_path_table: list[pd.DataFrame] = generate_nearest_neighbor_table(all_player_paths, hostage_graph.nodes)
     # player_path_table: list[pd.DataFrame] = generate_nearest_path_table(all_player_paths, hostage_graph.nodes)
 
-
     for i, path in enumerate(player_path_table):
         print(f"{i}: {path.shape}  {max(path['Timestep'])}")
 
@@ -35,5 +34,3 @@ if __name__ == "__main__":
     plt.savefig("temp.png")
 
     plt.show()
-
-

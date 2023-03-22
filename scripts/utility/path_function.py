@@ -3,6 +3,8 @@ import os
 import random
 import re
 
+import pandas as pd
+
 
 # Node Class
 class Node:
@@ -371,3 +373,10 @@ def __distance3D(coordA: tuple, coordB: tuple) -> float:
 # return: float
 def __distance2D(coordA: tuple, coordB: tuple) -> float:
     return math.sqrt(pow(coordA[0] - coordB[0], 2) + pow(coordA[1] - coordB[1], 2))
+
+
+def read_df_dir(df_dir: str):
+    df_list = []
+    for file_name in os.listdir(df_dir):
+        df_list.append(pd.read_csv(os.path.join(df_dir, file_name)))
+    return df_list

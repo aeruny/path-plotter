@@ -130,7 +130,7 @@ def generate_nearest_target_distance_df(path: list[Node], targets: list[Node]) -
     return pd.DataFrame(data_list, columns=["Timestep", "Nearest Target", "Distance"])
 
 
-def generate_nearest_neighbor_table(paths: list[list[Node]], targets: list[Node]) -> list[pd.DataFrame]:
+def generate_nearest_target_distance_df_list(paths: list[list[Node]], targets: list[Node]) -> list[pd.DataFrame]:
     return [generate_nearest_target_distance_df(path, targets) for path in paths]
 
 
@@ -139,22 +139,17 @@ def deviation_nearest_point_distance(path: list[Node], targets: list[Node], thre
 
     # The first node is the start location of the player
     rescue_order.insert(0, path[0])
-
+    #
     path_lines = [(rescue_order[i], rescue_order[i + 1]) for i in range(len(rescue_order) - 1)]
     p_index = 0
     path_distances = []
     path_targets = []
-    # print(f"rescued count: {len(rescue_order)}")
-    # print_path(rescue_order)
-    # print(rescue_time)
     for node in path:
         path_distances.append(closest_point_distance(path_lines[p_index], node))
         path_targets.append(int(str(rescue_order[p_index + 1]).split(" ")[-1]))
         if node.time == rescue_time[p_index]:
-            # print(f"At path_i = {p_index} -> {rescue_order[p_index + 1]}")
             p_index += 1
             if p_index >= len(rescue_time):
-                # print(f"{node.label}: {len(path)}")
                 break
     return path_distances, path_targets
 
@@ -162,7 +157,7 @@ def deviation_nearest_point_distance(path: list[Node], targets: list[Node], thre
 def generate_deviation_nearest_point_distance_df(path: list[Node], targets: list[Node], threshold: float = 5):
     distance_list, target_list = deviation_nearest_point_distance(path, targets, threshold)
     df_data_list = [[node.time, target, distance] for node, target, distance in zip(path, target_list, distance_list)]
-    return pd.DataFrame(df_data_list, columns=["Time", "Target", "Distance"])
+    return pd.DataFrame(df_data_list, columns=["Timestep", "Next Target", "Distance"])
 
 
 def generate_deviation_nearest_point_distance_df_list(paths: list[list[Node]], targets: list[Node],
@@ -170,7 +165,7 @@ def generate_deviation_nearest_point_distance_df_list(paths: list[list[Node]], t
     return [generate_deviation_nearest_point_distance_df(path, targets, threshold) for path in paths]
 
 
-def path_df(paths: list[list[Node]]) -> list[pd.DataFrame]:
+def generate_path_df(paths: list[list[Node]]) -> list[pd.DataFrame]:
     path_df_list = []
     for path in paths:
         path_data = []

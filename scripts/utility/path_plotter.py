@@ -21,7 +21,7 @@ class PathPlotter:
         plt.grid(True)
         plt.show()
 
-    def plot2D(self, plot_name: str, path: list[Node], graph: Graph = None, unity_coordinate = False):
+    def plot2D(self, plot_name: str, path: list[Node], graph: Graph = None, unity_coordinate=False, file_name=""):
         # Plot Design
         # plt.xlim(-self.plot_size[0]//2, self.plot_size[0]//2)
         # plt.ylim(-self.plot_size[1]//2, self.plot_size[1]//2)
@@ -29,7 +29,6 @@ class PathPlotter:
             x_lim, y_lim = self.__get_center_limits(path, offset=50)
             plt.xlim(x_lim[0], x_lim[1])
             plt.ylim(y_lim[0], y_lim[1])
-
 
         plt.axhline(y=0, color="black", linestyle="-")
         plt.axvline(x=0, color="black", linestyle="-")
@@ -50,7 +49,6 @@ class PathPlotter:
         if unity_coordinate:
             p_x, p_y, p_z = nodes_to_unity_coordinates(path)
         plt.plot(p_x, p_y, linestyle='-', color='blue', markersize=10.0)
-
 
         plt.grid(True)
         plt.show()
@@ -80,13 +78,14 @@ class PathPlotter:
 
         plt.show()
 
-    def plot_all_paths2D(self, plot_name: str, paths: list[list[Node]], hostage_graph: Graph, shortest_path: list[Node]):
+    def plot_all_paths2D(self, plot_name: str, paths: list[list[Node]], hostage_graph: Graph,
+                         shortest_path: list[Node]):
         # syntax for 3-D projection
         # x_lim, y_lim = self.__get_center_limits(path, offset=50)
         # plt.xlim(x_lim[0], x_lim[1])
         # plt.ylim(y_lim[0], y_lim[1])
 
-        #plt.figure(figsize=(10, 8), dpi=200)
+        # plt.figure(figsize=(10, 8), dpi=200)
         fig, ax = plt.subplots()
 
         ax.axhline(y=0, color="black", linestyle="-")

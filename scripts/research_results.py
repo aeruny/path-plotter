@@ -1,8 +1,8 @@
 import unittest
-
 from os.path import join
-from utility.path_plotter import *
+
 from utility.path_analysis import *
+from utility.path_plotter import *
 
 
 def test_all_participant_path_plot():
@@ -42,30 +42,63 @@ class ResearchResults(unittest.TestCase):
         # Obtain the Nearest Neighbor Path
         self.ideal_path_nn: list[Node] = nearest_neighbor(self.hostage_graph, Node((0, 0, 0)))
 
-    def test_path_to_target_df(self):
-        table = target_distances_df(self.player_paths[0], self.hostage_graph.nodes)
-        print(table)
-        table.to_csv(os.path.join(self.result_file_path, "participant001_target_distance_table.csv"))
+    # This code plots and saves all player paths into the destination path
+    def test_generate_all_path_plots_separate(self):
+        destination_path = "results/path_plots"
 
-    def test_nearest_neighbor_table(self):
-        table = generate_nearest_target_distance_df(self.player_paths[0], self.hostage_graph.nodes)
-        print(table)
-        table.to_csv(os.path.join(self.result_file_path, "participant001_nearest_neighbor_table.csv"))
+        paths = generate_path_df(self.player_paths)
+        for file_name, path in zip(os.listdir(self.player_dir), paths):
+            title = f"Participant {file_name.split('_')[0]}'s Path"
+            h_x, h_y, h_z = nodes_to_coordinates(self.hostage_graph.nodes)
+            plt.plot(path['x'], path['y'])
+            plt.scatter(h_x, h_y)
+            plt.title(title)
+            save_title = f"participant_{file_name.split('_')[0]}_path.png"
+            plt.savefig(join(destination_path, save_title))
+            plt.clf()
+
+    # This code plots and saves all player paths as 3D plots into the destination path
+    def test_generate_all_path_plots_3D(self):
+        destination_path = "results/path_3d_plots"
+
+        path_df_list = generate_path_df(self.player_paths)
+
+        for file_name, path_df in zip(os.listdir(self.player_dir), path_df_list):
+            title = f"Participant {file_name.split('_')[0]}'s Path"
+            fig = plt.figure()
+            ax = plt.axes(projection='3d')
+            ax.set_title(title)
+
+            h_x, h_y, h_z = nodes_to_coordinates(self.hostage_graph.nodes)
+            ax.plot3D(path_df['x'], path_df['y'], path_df['z'])
+            ax.scatter3D(h_x, h_y, h_z)
+
+            save_title = f"participant_{file_name.split('_')[0]}_path.png"
+            fig.savefig(join(destination_path, save_title))
+            plt.close(fig)
+
+    # Nearest Target Distance
 
     def test_deviation_nearest_target_table(self):
         destination_path = "results/nearest_target_distance"
-        df_table = generate_nearest_neighbor_table(self.player_paths, self.hostage_graph.nodes)
-        for i, table in enumerate(df_table):
+        df_list = generate_nearest_target_distance_df_list(self.player_paths, self.hostage_graph.nodes)
+        for i, table in enumerate(df_list):
             table.to_csv(join(destination_path, f"participant_{(i + 1):03}_nearest_target_distance.csv"), index=False)
 
-    def test_nearest_neighbor_graph(self):
-        table = generate_nearest_target_distance_df(self.player_paths[0], self.hostage_graph.nodes)
-        table.plot.line(x='Timestep', y='Distance')
+    def test_plot_deviation_nearest_target_distance(self):
+        destination_path = "results"
+        df_table = generate_nearest_target_distance_df_list(self.player_paths, self.hostage_graph.nodes)
+        for df_list in df_table:
+            plt.plot(df_list['Timestep'], df_list['Distance'])
+
+        plt.title("Nearest Target Distance")
+        plt.xlabel("Timestep (s)")
+        plt.ylabel("Distance (m)")
+
+        plt.savefig(join(destination_path, "nearest_target_distance.png"))
         plt.show()
 
-    def test_path_df(self):
-        path_list = path_df(self.player_paths)
-        print(list)
+    # Nearest Path Point Distance
 
     def test_rescue_order(self):
         rescue_order_list = []
@@ -82,11 +115,40 @@ class ResearchResults(unittest.TestCase):
         table_with_time.to_csv(join(self.result_file_path, "rescue_order_table_with_time.csv"), index=False)
 
     def test_generate_deviation_nearest_point_distance(self):
-        destination_path = "results/nearest_point_distance"
-        df_table = generate_deviation_nearest_point_distance_df_list(self.player_paths, self.hostage_graph.nodes,
-                                                                     threshold=5)
-        for i, table in enumerate(df_table):
-            table.to_csv(join(destination_path, f"participant_{(i + 1):03}_nearest_point_distance.csv"), index=False)
+        destination_path = "results/nearest_path_distance"
+        df_list = generate_deviation_nearest_point_distance_df_list(self.player_paths, self.hostage_graph.nodes,
+                                                                    threshold=5)
+        for i, table in enumerate(df_list):
+            table.to_csv(join(destination_path, f"participant_{(i + 1):03}_nearest_path_distance.csv"), index=False)
+
+    def test_deviation_nearest_point_distance(self):
+        distance_df_028 = generate_deviation_nearest_point_distance_df(self.player_paths[28],
+                                                                       self.hostage_graph.nodes,
+                                                                       threshold=5)
+
+        # distance_df_031 = generate_deviation_nearest_point_distance_df(self.player_paths[30],
+        #                                                                self.hostage_graph.nodes,
+        #                                                                threshold=5)
+        for time, dist in zip(distance_df_028['Timestep'], distance_df_028['Distance']):
+            # if dist > 1000:
+            print(f"{time}: {dist}")
+
+    def test_plot_deviation_nearest_point_distance(self):
+        destination_path = "results"
+        df_table: list[pd.DataFrame] = generate_deviation_nearest_point_distance_df_list(self.player_paths,
+                                                                                         self.hostage_graph.nodes,
+                                                                                         threshold=5)
+        fig, ax = plt.subplots()
+
+        for df_list in df_table:
+            ax.plot(df_list['Timestep'], df_list['Distance'])
+
+        plt.title("Nearest Path Point Distance")
+        plt.xlabel("Timestep (s)")
+        plt.ylabel("Distance (m)")
+
+        plt.savefig(join(destination_path, "nearest_path_point_distance.png"))
+        plt.show()
 
 
 if __name__ == '__main__':
