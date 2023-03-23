@@ -2,6 +2,7 @@ import unittest
 
 from os.path import join
 from matplotlib import pyplot as plt
+import pandas as pd
 
 from utility.path_analysis import *
 from utility.path_function import *
@@ -15,7 +16,7 @@ class QuickTests(unittest.TestCase):
         self.drone_dir = "data/calibrated_drone"
         self.hostage_file_path = "data/hostageLocations.txt"
 
-        self.player_path_df_list = generate_path_df()
+        # self.player_path_df_list = generate_path_df()
 
         # Extract the player path
         # self.player_paths: list[list[Node]] = []
@@ -29,21 +30,33 @@ class QuickTests(unittest.TestCase):
         # Obtain the Nearest Neighbor Path
         self.ideal_path_nn: list[Node] = nearest_neighbor(self.hostage_graph, Node((0, 0, 0)))
 
-    def test_generate_all_path_plots_separate(self):
+    def test_generate_path_plot(self):
         destination_path = "results/path_plots"
-        df = read_df_dir(join(self.player_df_dir))
-        paths = generate_path_df(self.player_paths)
-        for file_name, path in zip(os.listdir(self.player_dir), paths):
-            title = f"Participant {file_name.split('_')[0]}'s Path"
-            h_x, h_y, h_z = nodes_to_coordinates(self.hostage_graph.nodes)
-            plt.plot(path['x'], path['y'])
-            plt.scatter(h_x, h_y)
-            plt.scatter([-321.176809293348], [-761.8827116025751], marker='O')
-            plt.title(title)
-            save_title = f"participant_029_test_path.png"
-            plt.savefig(join(destination_path, save_title))
-            plt.clf()
+        path_df = pd.read_csv(join(self.player_df_dir, "participant_029_path_data.csv"))
+        title = f"Participant 029's Path"
+        h_x, h_y, h_z = nodes_to_coordinates(self.hostage_graph.nodes)
+        plt.plot(path_df['x'], path_df['y'])
+        plt.scatter(h_x, h_y)
+        plt.scatter([-321.176809293348], [-761.8827116025751], color='red')
+        plt.title(title)
+        save_title = f"participant_029_test_path.png"
+        plt.show()
 
+    def test_generate_3d_path_plot(self):
+        destination_path = "results/path_plots"
+        path_df = pd.read_csv(join(self.player_df_dir, "participant_029_path_data.csv"))
+        title = f"Participant 029's Path"
+        h_x, h_y, h_z = nodes_to_coordinates(self.hostage_graph.nodes)
+
+        figure = plt.figure()
+        ax = plt.axes(projection='3d')
+
+        ax.plot3D(path_df['x'], path_df['y'], path_df['z'])
+        ax.scatter3D(h_x, h_y, h_z)
+        ax.scatter3D([-321.176809293348], [-761.8827116025751], [-23.82], color='red')
+        ax.set_title(title)
+        save_title = f"participant_029_test_path.png"
+        plt.show()
 
 if __name__ == '__main__':
     unittest.main()
