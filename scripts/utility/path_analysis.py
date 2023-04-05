@@ -93,7 +93,7 @@ def get_closest_point(line: tuple[Node, Node], point: Node) -> Node:
     elif proj_param <= 1:
         return vector.add(line[0], vector.multiply(proj_param, u))  # projection vector: projv(u)
     else:
-        return vector.subtract(line[1], point)
+        return line[1]
 
 
 def closest_point_distance(line: tuple[Node, Node], point: Node) -> float:
@@ -109,7 +109,6 @@ def target_distances_df(path: list[Node], targets: list[Node]):
         for target in targets:
             row.append(distance3D(node, target))
         data_list.append(row)
-
     return pd.DataFrame(data_list, columns=["Timestep"] +
                                            [f"Target {i + 1}" for i in range(len(targets))])
 
@@ -139,18 +138,18 @@ def deviation_nearest_point_distance(path: list[Node], targets: list[Node], thre
 
     # The first node is the start location of the player
     rescue_order.insert(0, path[0])
-    #
-    path_lines = [(rescue_order[i], rescue_order[i + 1]) for i in range(len(rescue_order) - 1)]
     p_index = 0
     path_distances = []
     path_targets = []
+    last_target = False
     for node in path:
-        path_distances.append(closest_point_distance(path_lines[p_index], node))
+        path_distances.append(closest_point_distance((rescue_order[p_index], rescue_order[p_index + 1]), node))
         path_targets.append(int(str(rescue_order[p_index + 1]).split(" ")[-1]))
-        if node.time == rescue_time[p_index]:
+        if not last_target and node.time == rescue_time[p_index]:
             p_index += 1
             if p_index >= len(rescue_time):
-                break
+                last_target = True
+                p_index -= 1
     return path_distances, path_targets
 
 

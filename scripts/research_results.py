@@ -116,16 +116,16 @@ class ResearchResults(unittest.TestCase):
 
     def test_generate_deviation_nearest_point_distance(self):
         destination_path = "results/nearest_path_distance"
+        file_name_list = os.listdir(self.player_dir)
         df_list = generate_deviation_nearest_point_distance_df_list(self.player_paths, self.hostage_graph.nodes,
                                                                     threshold=5)
-        for i, table in enumerate(df_list):
-            table.to_csv(join(destination_path, f"participant_{(i + 1):03}_nearest_path_distance.csv"), index=False)
+        for file_name, table in zip(file_name_list, df_list):
+            table.to_csv(join(destination_path, f"participant_{file_name.split('_')[0]}_nearest_path_distance.csv"), index=False)
 
     def test_deviation_nearest_point_distance(self):
         distance_df_028 = generate_deviation_nearest_point_distance_df(self.player_paths[28],
                                                                        self.hostage_graph.nodes,
                                                                        threshold=5)
-
         # distance_df_031 = generate_deviation_nearest_point_distance_df(self.player_paths[30],
         #                                                                self.hostage_graph.nodes,
         #                                                                threshold=5)

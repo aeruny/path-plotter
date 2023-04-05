@@ -40,6 +40,10 @@ class PrimitiveResults(unittest.TestCase):
         plt.savefig(join(result_destination, "hostage_label_plot.png"))
         plt.show()
 
+    def test_deviation_nearest_point_distance(self):
+        # generate_deviation_nearest_point_distance_df
+        pass
+
 
 
 if __name__ == '__main__':
